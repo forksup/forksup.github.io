@@ -1,0 +1,162 @@
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><span style="color: #66d9ef">def</span> <span style="color: #a6e22e">bDSearchMM</span><span style="color: #f8f8f2">(problem,</span> <span style="color: #f8f8f2">heuristic):</span>
+
+    <span style="color: #75715e"># Now MM search, which is astar in each direction</span>
+    <span style="color: #f8f8f2">q1,</span> <span style="color: #f8f8f2">q2</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">util</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">PriorityQueue(),</span> <span style="color: #f8f8f2">util</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">PriorityQueue()</span>
+
+    <span style="color: #75715e"># Declare dict to store visited positions</span>
+    <span style="color: #f8f8f2">visitedPos1,visitedPos2</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{},</span> <span style="color: #f8f8f2">{}</span>
+
+    <span style="color: #75715e"># Add both starting states to visited Dicts</span>
+    <span style="color: #f8f8f2">visitedPos1[problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getStartState()]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[]</span>
+    <span style="color: #f8f8f2">visitedPos2[problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">goal]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[]</span>
+
+    <span style="color: #75715e"># We use a priority que to store nodes in the frontier with the A* cost metric of f(n)=h(n)+g(n)</span>
+    <span style="color: #75715e"># problem.getCostOfActions() = g(n)</span>
+    <span style="color: #75715e"># heuristic(state, problem) = f(n)</span>
+    <span style="color: #f8f8f2">q1</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push((problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getStartState()),</span> <span style="color: #f8f8f2">(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getCostOfActions({})</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">heuristic(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getStartState(),</span> <span style="color: #f8f8f2">problem,</span> <span style="color: #e6db74">"g"</span><span style="color: #f8f8f2">)))</span>
+    <span style="color: #f8f8f2">q2</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push((problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">goal),</span> <span style="color: #f8f8f2">(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getCostOfActions({})</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">heuristic(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">goal,</span> <span style="color: #f8f8f2">problem,</span> <span style="color: #e6db74">"s"</span><span style="color: #f8f8f2">)))</span>
+
+    <span style="color: #75715e"># Run while both frontier's are not empty and return [] in the case the goal is not reachable from the start</span>
+    <span style="color: #66d9ef">while</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">q1</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isEmpty()</span> <span style="color: #f92672">and</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">q2</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isEmpty():</span>
+
+        <span style="color: #75715e"># Run both searches at simultaneously</span>
+        <span style="color: #f8f8f2">cpos1</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">q1</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop()</span>
+
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isGoalState(cpos1,</span> <span style="color: #f8f8f2">visitedPos2):</span>
+            <span style="color: #f8f8f2">revd</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[direction[x]</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">x</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">visitedPos2[cpos1]]</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">visitedPos1[cpos1]</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">revd[::</span><span style="color: #f92672">-</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span>
+
+        <span style="color: #f8f8f2">successors</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getSuccessors(cpos1)</span>
+
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">state</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">successors:</span>  <span style="color: #75715e"># priority queue manages order for us so we don't have to use if statements</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">visitedPos1:</span>
+                <span style="color: #66d9ef">continue</span>
+
+            <span style="color: #f8f8f2">visitedPos1[state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">list(visitedPos1[cpos1])</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">[state[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]]</span>
+            <span style="color: #f8f8f2">q1</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getCostOfActions(visitedPos1[state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]])</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">heuristic(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">problem,</span> <span style="color: #e6db74">"g"</span><span style="color: #f8f8f2">)))</span>
+
+        <span style="color: #f8f8f2">cpos2</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">q2</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop()</span>
+
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isGoalState(cpos2,</span> <span style="color: #f8f8f2">visitedPos1):</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">visitedPos1[cpos2]</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">[direction[x]</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">x</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">visitedPos2[cpos2]][::</span><span style="color: #f92672">-</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span>
+
+        <span style="color: #f8f8f2">successors</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getSuccessors(cpos2)</span>
+
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">state</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">successors:</span>  <span style="color: #75715e"># priority queue manages order for us so we don't have to use if statements</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">visitedPos2:</span>
+                <span style="color: #66d9ef">continue</span>
+
+            <span style="color: #f8f8f2">visitedPos2[state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">list(visitedPos2[cpos2])</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">[state[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]]</span>
+            <span style="color: #f8f8f2">q2</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span>
+                    <span style="color: #f8f8f2">(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getCostOfActions(visitedPos2[state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]])</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">heuristic(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">problem,</span> <span style="color: #e6db74">"s"</span><span style="color: #f8f8f2">)))</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">[]</span><span style="color: #66d9ef">def</span> <span style="color: #a6e22e">bDSearchMM</span><span style="color: #f8f8f2">(problem,</span> <span style="color: #f8f8f2">heuristic):</span>
+
+    <span style="color: #75715e"># Now MM search, which is astar in each direction</span>
+    <span style="color: #f8f8f2">q1,</span> <span style="color: #f8f8f2">q2</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">util</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">PriorityQueue(),</span> <span style="color: #f8f8f2">util</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">PriorityQueue()</span>
+
+    <span style="color: #75715e"># Declare dict to store visited positions</span>
+    <span style="color: #f8f8f2">visitedPos1,visitedPos2</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{},</span> <span style="color: #f8f8f2">{}</span>
+
+    <span style="color: #75715e"># Add both starting states to visited Dicts</span>
+    <span style="color: #f8f8f2">visitedPos1[problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getStartState()]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[]</span>
+    <span style="color: #f8f8f2">visitedPos2[problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">goal]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[]</span>
+
+    <span style="color: #75715e"># We use a priority que to store nodes in the frontier with the A* cost metric of f(n)=h(n)+g(n)</span>
+    <span style="color: #75715e"># problem.getCostOfActions() = g(n)</span>
+    <span style="color: #75715e"># heuristic(state, problem) = f(n)</span>
+    <span style="color: #f8f8f2">q1</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push((problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getStartState()),</span> <span style="color: #f8f8f2">(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getCostOfActions({})</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">heuristic(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getStartState(),</span> <span style="color: #f8f8f2">problem,</span> <span style="color: #e6db74">"g"</span><span style="color: #f8f8f2">)))</span>
+    <span style="color: #f8f8f2">q2</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push((problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">goal),</span> <span style="color: #f8f8f2">(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getCostOfActions({})</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">heuristic(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">goal,</span> <span style="color: #f8f8f2">problem,</span> <span style="color: #e6db74">"s"</span><span style="color: #f8f8f2">)))</span>
+
+    <span style="color: #75715e"># Run while both frontier's are not empty and return [] in the case the goal is not reachable from the start</span>
+    <span style="color: #66d9ef">while</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">q1</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isEmpty()</span> <span style="color: #f92672">and</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">q2</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isEmpty():</span>
+
+        <span style="color: #75715e"># Run both searches at simultaneously</span>
+        <span style="color: #f8f8f2">cpos1</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">q1</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop()</span>
+
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isGoalState(cpos1,</span> <span style="color: #f8f8f2">visitedPos2):</span>
+            <span style="color: #f8f8f2">revd</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[direction[x]</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">x</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">visitedPos2[cpos1]]</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">visitedPos1[cpos1]</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">revd[::</span><span style="color: #f92672">-</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span>
+
+        <span style="color: #f8f8f2">successors</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getSuccessors(cpos1)</span>
+
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">state</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">successors:</span>  <span style="color: #75715e"># priority queue manages order for us so we don't have to use if statements</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">visitedPos1:</span>
+                <span style="color: #66d9ef">continue</span>
+
+            <span style="color: #f8f8f2">visitedPos1[state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">list(visitedPos1[cpos1])</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">[state[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]]</span>
+            <span style="color: #f8f8f2">q1</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getCostOfActions(visitedPos1[state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]])</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">heuristic(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">problem,</span> <span style="color: #e6db74">"g"</span><span style="color: #f8f8f2">)))</span>
+
+        <span style="color: #f8f8f2">cpos2</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">q2</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop()</span>
+
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isGoalState(cpos2,</span> <span style="color: #f8f8f2">visitedPos1):</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">visitedPos1[cpos2]</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">[direction[x]</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">x</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">visitedPos2[cpos2]][::</span><span style="color: #f92672">-</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span>
+
+        <span style="color: #f8f8f2">successors</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getSuccessors(cpos2)</span>
+
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">state</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">successors:</span>  <span style="color: #75715e"># priority queue manages order for us so we don't have to use if statements</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">visitedPos2:</span>
+                <span style="color: #66d9ef">continue</span>
+
+            <span style="color: #f8f8f2">visitedPos2[state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">list(visitedPos2[cpos2])</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">[state[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]]</span>
+            <span style="color: #f8f8f2">q2</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span>
+                    <span style="color: #f8f8f2">(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getCostOfActions(visitedPos2[state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]])</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">heuristic(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">problem,</span> <span style="color: #e6db74">"s"</span><span style="color: #f8f8f2">)))</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">[]</span>
+
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">bDSearchMM0</span><span style="color: #f8f8f2">(problem):</span>
+
+    <span style="color: #75715e"># mm0 is essentially bidrectional BFS</span>
+    <span style="color: #75715e"># initialize everything we need, so 2 queues, and 2 visited position dicts</span>
+    <span style="color: #f8f8f2">q1,</span> <span style="color: #f8f8f2">q2</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">util</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">Queue(),</span>  <span style="color: #f8f8f2">util</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">Queue()</span>
+
+    <span style="color: #75715e"># Note these are dicts because each key is a visited position</span>
+    <span style="color: #75715e"># the value for each of those keys is the path we took to get there</span>
+    <span style="color: #f8f8f2">visitedPos1,</span> <span style="color: #f8f8f2">visitedPos2</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{},</span> <span style="color: #f8f8f2">{}</span>
+
+    <span style="color: #75715e"># Set up initial starting conditions</span>
+    <span style="color: #75715e"># so q1 starts from start and q2 starts from goal</span>
+    <span style="color: #f8f8f2">q1</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getStartState())</span>
+    <span style="color: #f8f8f2">q2</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">goal)</span>
+
+    <span style="color: #75715e"># Mark those states as visited</span>
+    <span style="color: #f8f8f2">visitedPos1[problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getStartState()]</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">''</span>
+    <span style="color: #f8f8f2">visitedPos2[problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">goal]</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">''</span>
+
+    <span style="color: #75715e"># Run until either queue is empty meaning there is no path from start to goal</span>
+    <span style="color: #66d9ef">while</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">q1</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isEmpty()</span> <span style="color: #f92672">and</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">q2</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isEmpty():</span>
+        <span style="color: #75715e"># While q2 is not empty</span>
+        <span style="color: #66d9ef">while</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">q1</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isEmpty():</span>
+            <span style="color: #75715e"># Pop current pos and current path to get to that ops off priority queue</span>
+            <span style="color: #f8f8f2">cpos1</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">q1</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop()</span>
+
+            <span style="color: #75715e"># Check if we have a goal state</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isGoalState(cpos1,</span> <span style="color: #f8f8f2">visitedPos2):</span>
+                <span style="color: #f8f8f2">revd</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[direction[x]</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">x</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">visitedPos2[cpos1]]</span>
+                <span style="color: #75715e"># If so, reverse the other path that other search took to meet us, then append</span>
+                <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">visitedPos1[cpos1]</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">revd[::</span><span style="color: #f92672">-</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span>
+
+            <span style="color: #75715e"># If no goal state, expand all successors</span>
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">state</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getSuccessors(cpos1):</span>  <span style="color: #75715e"># Priority queue manages order for us so we don't have to use if statements</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">visitedPos1:</span> <span style="color: #75715e"># If already visited, don't visit again</span>
+                    <span style="color: #66d9ef">continue</span>
+
+                <span style="color: #75715e"># Push each state and mark visited</span>
+                <span style="color: #f8f8f2">q1</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">])</span>
+                <span style="color: #f8f8f2">visitedPos1[state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">list(visitedPos1[cpos1])</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">[state[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]]</span>
+
+        <span style="color: #75715e"># Second bfs instance, same as first just searching in reverse!</span>
+        <span style="color: #66d9ef">while</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">q2</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isEmpty():</span>
+            <span style="color: #f8f8f2">cpos2</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">q2</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop()</span>
+
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isGoalState(cpos2,</span> <span style="color: #f8f8f2">visitedPos1):</span>
+                <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">[direction[x]</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">x</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">visitedPos1[cpos2]][::</span><span style="color: #f92672">-</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">visitedPos2[cpos2]</span>
+
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">state</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getSuccessors(cpos2):</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">visitedPos2:</span>
+                    <span style="color: #66d9ef">continue</span>
+
+                <span style="color: #f8f8f2">q2</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">])</span>
+                <span style="color: #f8f8f2">visitedPos2[state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">list(visitedPos2[cpos2])</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">[state[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]]</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">[]</span>
+</pre></div>

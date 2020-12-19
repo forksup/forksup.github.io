@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<!--[if lt IE 8 ]><html class="no-js ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="no-js ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 8)|!(IE)]><!--><html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+
+   <!--- Basic Page Needs
+   ================================================== -->
+   <meta charset="utf-8">
+	<title>mitchell.rocks - Bidirectional Search</title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+   <!-- Mobile Specific Metas
+   ================================================== -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<!-- CSS
+    ================================================== -->
+   <link rel="stylesheet" href="css/default.css">
+	<link rel="stylesheet" href="css/layout.css">
+   <link rel="stylesheet" href="css/media-queries.css">
+   <link rel="stylesheet" href="css/magnific-popup.css">
+
+   <!-- Script
+   ================================================== -->
+   <script src="js/modernizr.js"></script>
+
+   <!-- Favicons
+	================================================== -->
+	<link rel="shortcut icon" href="favicon.ico" >
+
+</head>
+
+<body>
+
+   <!-- Header
+   ================================================== -->
+      <nav id="nav-wrap" class="opaque">
+
+         <a class="mobile-btn" href="#nav-wrap" title="Show navigation">Show navigation</a>
+         <a class="mobile-btn" href="#" title="Hide navigation">Hide navigation</a>
+
+         <ul id="nav" class="nav">
+            <li><a class="smoothscroll" href="index.html">Home</a></li>
+            <li class="current"><a class="smoothscroll" href="#top" id="inactiveLink">Bidirectional Search</a></li>
+         </ul> <!-- end #nav -->
+
+      </nav> <!-- end #nav-wrap -->
+
+
+   <section id="top" style="padding: 90px 0 72px; background: #fff;">
+
+      <div class="row add-bottom">
+
+         <div class="twelve columns">
+
+            <h1>CSE 571 Final Project: Bidirectional Search</h1>
+
+            <p class="lead add-bottom">Instead of doing a final exam, our teacher opted for doing a final project this Fall 2020 semester in CSE 571: Intro to Artificial Intelligence. This class taught me many beginner and intermediate AI techniques and concepts. This was my first AI class and will certeintly not be my last! This project is similar to the Pacman search problem I completed for this class.
+            </p>
+
+            <h3>About Bidirectional Search</h3>
+            <p>
+               In this project we implemented Bidirectional search as described in the paper, <a href="571/BidirectionalSearch.pdf"><em>"Bidirectional Search That Is Guaranteed to Meet in the Middle"</em></a>. This algorithm works be running two searches. One from the goal position and another from the start position. These two searches run until they meet in the middle and thus a solution is found. There are two varients of this algorithm, <b>Bidirectional Search (mm)</b> and <b>Brute Force Bidirectional Search (mm0)</b>. Brute force works similarly to BFS and does not use any type of search strategy. The latter is similar to A* search as it utilizes a search strategy. The concept is illustrated below in the diagram:
+
+            </p>
+
+
+         </div>
+
+      </div> <!-- Row End-->
+
+      <div class="row add-bottom">
+
+         <div class="three columns add-bottom">
+
+            <figure>
+               <img src="images/bfs.png" alt="Trulli" style="width:100%" class="center">
+               <figcaption class="center">Traditional BFS Algorithm</figcaption>
+            </figure>
+
+         </div>
+
+         <div class="nine columns add-bottom">
+
+            <figure>
+               <img src="images/bidirectional.png" alt="Trulli" style="width:100%" class="center">
+               <figcaption class="center">Bidirectional Search</figcaption>
+            </figure>
+
+         </div>
+
+         <hr>
+
+      </div>
+
+
+      <div class="row add-bottom">
+
+         <div class="12 columns add-bottom centered-thing">
+
+             <h3>Our Findings</h3>
+            <p>
+               Below is a paper demonstrating all of our findings. We compared this search technique with several others including Breadth First Search, Depth First Search, Uniform Cost Search, and A*. We used the number of  nodes expanded as the main metric for this comparison. This value reflects the amount of resources and time utilzied by the script. We found Bidirectional search to be optimal over traditional search algorithms using this metric. 
+            </p>
+
+            <embed src="Final_Report.pdf" type="application/pdf" height="1000px" width="1000px">
+
+         </div>
+
+         <hr />
+
+      </div> <!-- Row End-->
+
+
+      <div class="row add-bottom">
+
+         <div class="12 columns add-bottom centered-thing">
+
+             <h3>The code</h3>
+
+            <embed src="highlighted.html" type="application/pdf" height="1000px" width="1000px">
+
+         </div>
+
+         <hr />
+
+      </div> <!-- Row End-->
+
+
+      <div class="row add-bottom">
+
+        <div class="twelve columns add-bottom">
+
+            <h3 class="add-bottom">More Info from NASA & Sources</h3>
+
+            <dl>
+               <dt><b>Bidirectional Search That Is Guaranteed to Meet in the Middle</b></dt>
+                  <dd>By Robert C. Holte, Ariel Felner, Guni Sharon, and Nathan R. Sturtevant</dd>
+              <a href="571/BidirectionalSearch.pdf">Link</a>
+               <dt><b>Project Description</b></dt>
+                  <dd>By Prof Yu Zhang</dd>
+               <a href="571/Final_Report.pdf">Link</a>
+            </dl>
+         </div>
+
+      </div> <!-- Row End-->
+
+   <!-- footer
+   ================================================== -->
+   <footer>
+
+      <div class="row">
+
+         <div class="twelve columns">
+
+            <ul class="social-links">
+               
+               <li><a href="https://www.linkedin.com/in/mitchell-bucklew-3b9315138/"><i class="fa fa-linkedin"></i></a></li>
+               <li><a href="https://www.youtube.com/channel/UCt4hxBaveiN_wAD2Fyb4uvA"><i class="fa fa-youtube"></i></a></li>
+               <li><a href="https://github.com/forksup"><i class="fa fa-github"></i></a></li>
+
+            </ul>
+
+            <ul class="copyright">
+               <li>&copy; Copyright 2014 CeeVee</li>
+               <li>Design by <a href="http://www.styleshout.com/" title="Styleshout" target="_blank">Styleshout</a></li>   
+            </ul>
+
+         </div>
+
+
+      </div>
+
+   </footer> <!-- Footer End-->
+
+   <!-- Java Script
+   ================================================== -->
+   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+   <script>window.jQuery || document.write('<script src="js/jquery-1.10.2.min.js"><\/script>')</script>
+   <script type="text/javascript" src="js/jquery-migrate-1.2.1.min.js"></script>
+
+   <script src="js/jquery.flexslider.js"></script>
+   <script src="js/waypoints.js"></script>
+   <script src="js/jquery.fittext.js"></script>
+   <script src="js/magnific-popup.js"></script>
+   <script src="js/doubletaptogo.js"></script>
+   <script src="js/spin.js"></script>
+
+
+</body>
+
+</html>

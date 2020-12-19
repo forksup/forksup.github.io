@@ -422,6 +422,13 @@ ul#nav li.current a { color: #F06000; }
   text-align: center;
 }
 
+.centered-thing {
+    margin: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -0%);
+}
+
 .banner {
   margin:auto;
   text-align:center;
