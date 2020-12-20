@@ -1,0 +1,593 @@
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;iostream&gt;</span>
+<span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;cstdlib&gt;</span>
+<span style="color: #75715e">#include</span> <span style="color: #75715e">"parser.h"</span>
+<span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;algorithm&gt;</span>
+<span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;math.h&gt;</span>
+
+<span style="color: #66d9ef">using</span> <span style="color: #66d9ef">namespace</span> <span style="color: #f8f8f2">std;</span>
+
+<span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f92672">&gt;</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">errors(</span><span style="color: #ae81ff">5</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f92672">&gt;</span><span style="color: #f8f8f2">(</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">));</span>
+
+<span style="color: #75715e">//used for error 2 checking</span>
+<span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">char</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">param;</span>
+
+<span style="color: #f8f8f2">Token</span> <span style="color: #f8f8f2">token;</span>
+<span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">inputSize</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+<span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">syntax_error()</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"SYNTAX ERROR !!!</span><span style="color: #ae81ff">\n</span><span style="color: #e6db74">"</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">exit(</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">);</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">symantics_error(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">code)</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">errors[code].push_back(token.line_no);</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">Token</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">expect(TokenType</span> <span style="color: #f8f8f2">expected_type)</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">lexer.GetToken();</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">expected_type)</span>
+        <span style="color: #f8f8f2">syntax_error();</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">token;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #75715e">// this function simply checks the next token without</span>
+<span style="color: #75715e">// consuming the input</span>
+<span style="color: #75715e">// Written by Mohsen Zohrevandi</span>
+<span style="color: #f8f8f2">Token</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">peek()</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">Token</span> <span style="color: #f8f8f2">t</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">lexer.GetToken();</span>
+    <span style="color: #f8f8f2">lexer.UngetToken(t);</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">t;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">allocateVariable(</span><span style="color: #66d9ef">char</span> <span style="color: #f8f8f2">input)</span> <span style="color: #f8f8f2">{</span>
+
+    <span style="color: #66d9ef">for</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;i</span><span style="color: #f92672">&lt;</span><span style="color: #f8f8f2">variable_table.size();i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(variable_table[i].symbol</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">input)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">i;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">symbol_table_struct</span> <span style="color: #f8f8f2">newEntry;</span>
+    <span style="color: #f8f8f2">newEntry.symbol</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">input;</span>
+    <span style="color: #f8f8f2">newEntry.index</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">variable_table.push_back(newEntry);</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">variable_table.size()</span><span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">findMemory(string</span> <span style="color: #f8f8f2">input)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">for</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;i</span><span style="color: #f92672">&lt;</span><span style="color: #f8f8f2">symbol_table.size();i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(symbol_table[i].symbol</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">input)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">i;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">symantics_error(</span><span style="color: #ae81ff">4</span><span style="color: #f8f8f2">);</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">allocateMemory(string</span> <span style="color: #f8f8f2">input)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">for</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;i</span><span style="color: #f92672">&lt;</span><span style="color: #f8f8f2">symbol_table.size();i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(symbol_table[i].symbol</span> <span style="color: #f92672">==</span>  <span style="color: #f8f8f2">input)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">symbol_table[i].index;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">variable</span> <span style="color: #f8f8f2">newEntry;</span>
+    <span style="color: #f8f8f2">newEntry.symbol</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">input;</span>
+    <span style="color: #f8f8f2">newEntry.index</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">symbol_table.size();</span>
+    <span style="color: #f8f8f2">symbol_table.push_back(newEntry);</span>
+    <span style="color: #f8f8f2">inputSize</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">newEntry.index;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">print_errors()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">for</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;i</span><span style="color: #f92672">&lt;</span><span style="color: #ae81ff">5</span><span style="color: #f8f8f2">;i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">sort(errors[i].begin(),</span> <span style="color: #f8f8f2">errors[i].end());</span>
+        <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(errors[i].size()</span> <span style="color: #f92672">&gt;</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(i</span> <span style="color: #f92672">!=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"</span><span style="color: #ae81ff">\n</span><span style="color: #e6db74">"</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Error Code "</span>  <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">(i</span><span style="color: #f92672">+</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">)</span>  <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">": "</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">errors[i].size();</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">errors[i][j]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" "</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_input()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">stmt</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">program</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_program();</span>
+    <span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">inputs</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_inputs(</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">);</span>
+    <span style="color: #f8f8f2">expect(END_OF_FILE);</span>
+
+    <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">found</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">false;</span>
+    <span style="color: #66d9ef">for</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">4</span><span style="color: #f8f8f2">;i</span><span style="color: #f92672">&gt;</span><span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">;i</span><span style="color: #f92672">--</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(errors[i].size()</span> <span style="color: #f92672">&gt;</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">print_errors();</span>
+            <span style="color: #f8f8f2">found</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">true;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(found</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">false)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">execute_program(program,</span> <span style="color: #f8f8f2">inputs);</span>
+    <span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">stmt</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_program()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_poly_decl_section();</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_start();</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_poly_decl_section()</span> <span style="color: #f8f8f2">{</span>
+   <span style="color: #f8f8f2">poly_declerations.push_back(</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">parse_poly_decl());</span>
+
+    <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">polyName</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">poly_declerations.back().name;</span>
+
+    <span style="color: #66d9ef">for</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">poly_declerations.size()</span><span style="color: #ae81ff">-2</span><span style="color: #f8f8f2">;i</span> <span style="color: #f92672">&gt;</span> <span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">;i</span><span style="color: #f92672">--</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(polyName.compare(poly_declerations[i].name)</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #f92672">!</span><span style="color: #f8f8f2">std</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">count(errors[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">].begin(),</span> <span style="color: #f8f8f2">errors[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">].end(),</span> <span style="color: #f8f8f2">poly_declerations[i].line_no))</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">errors[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">].push_back(poly_declerations[i].line_no);</span>
+            <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">errors[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">].push_back(lineNumber);</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">peek();</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">START)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">parse_poly_decl_section();</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">poly_decleration</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_poly_decl()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">expect(POLY);</span>
+    <span style="color: #f8f8f2">poly_decleration</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">newDecleration</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_polynomial_header();</span>
+    <span style="color: #f8f8f2">expect(EQUAL);</span>
+
+    <span style="color: #f8f8f2">param</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">newDecleration</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">Parameters;</span>
+    <span style="color: #f8f8f2">newDecleration</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">body</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_polynomial_body();</span>
+
+    <span style="color: #75715e">//Invalid monomial name</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(newDecleration</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">Parameters.size()</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">coefficient_list</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">bptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">newDecleration</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">body;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">expect(SEMICOLON);</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">newDecleration;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">coefficient_list</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_polynomial_body()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #a6e22e">parse_term_list</span><span style="color: #f8f8f2">();</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">coefficient_list</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_term_list()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">coefficient_list</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">newList</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_term();</span>
+
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">lexer.GetToken();</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">PLUS</span> <span style="color: #f92672">||</span> <span style="color: #f8f8f2">token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">MINUS)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">parse_add_operator();</span>
+        <span style="color: #f8f8f2">newList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">sign</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">token.token_type;</span>
+        <span style="color: #f8f8f2">newList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_term_list();</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">newList;</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">SEMICOLON)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">lexer.UngetToken(token);</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">newList;</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">lexer.UngetToken(token);</span>
+    <span style="color: #f8f8f2">}</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_add_operator()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">PLUS</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">token.token_type</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">MINUS)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">syntax_error();</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">coefficient_list</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_term()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">peek();</span>
+    <span style="color: #f8f8f2">coefficient_list</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">newList</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">coefficient_list();</span>
+    <span style="color: #f8f8f2">newList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">term</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #75715e">//monomial</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">ID)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">newList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">coLL</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_monomial_list();</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">NUM)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">parse_coeffecient();</span>
+        <span style="color: #f8f8f2">newList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">term</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stoi(token.lexeme);</span>
+        <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">peek();</span>
+        <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span><span style="color: #f92672">==</span><span style="color: #f8f8f2">ID)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">newList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">coLL</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_monomial_list();</span>
+        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">newList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">coLL</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">syntax_error();</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">newList;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">coefficient</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_monomial_list()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">coefficient</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">col</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">coefficient();</span>
+    <span style="color: #f8f8f2">col</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">;</span>
+
+    <span style="color: #f8f8f2">parse_monomial(col);</span>
+
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">peek();</span>
+
+    <span style="color: #75715e">//Check to see if there is another monomial</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">ID)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">col</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_monomial_list();</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">col</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">col;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_monomial(coefficient</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">col)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">expect(ID);</span>
+
+    <span style="color: #f8f8f2">col</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">x</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">allocateVariable(token.lexeme[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]);</span>
+
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(param.size()</span> <span style="color: #f92672">&gt;</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #f92672">!</span><span style="color: #f8f8f2">std</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">count(param.begin(),</span> <span style="color: #f8f8f2">param.end(),</span> <span style="color: #f8f8f2">variable_table[col</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">x].symbol))</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">symantics_error(</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(variable_table[col</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">x].symbol</span> <span style="color: #f92672">!=</span> <span style="color: #e6db74">'x'</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">symantics_error(</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">lexer.GetToken();</span>
+
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span><span style="color: #f92672">==</span><span style="color: #f8f8f2">POWER)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">lexer.UngetToken(token);</span>
+        <span style="color: #f8f8f2">col</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">y</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_exponent();</span>
+        <span style="color: #66d9ef">return</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">PLUS</span> <span style="color: #f92672">||</span> <span style="color: #f8f8f2">token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">ID</span> <span style="color: #f92672">||</span> <span style="color: #f8f8f2">token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">MINUS</span> <span style="color: #f92672">||</span> <span style="color: #f8f8f2">token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">SEMICOLON</span> <span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">lexer.UngetToken(token);</span>
+        <span style="color: #f8f8f2">col</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">y</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">syntax_error();</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_coeffecient()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">expect(NUM);</span>
+<span style="color: #f8f8f2">}</span>
+
+
+<span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_exponent()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">expect(POWER);</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #a6e22e">stoi</span><span style="color: #f8f8f2">(expect(NUM).lexeme);</span>
+<span style="color: #f8f8f2">}</span>
+
+
+<span style="color: #f8f8f2">poly_decleration</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_polynomial_header()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">parse_polynomial_name();</span>
+
+    <span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">poly_decleration</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">newDecleration</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">poly_decleration;</span>
+    <span style="color: #f8f8f2">newDecleration</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">line_no</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">token.line_no;</span>
+    <span style="color: #f8f8f2">newDecleration</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">name</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">token.lexeme;</span>
+
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">lexer.GetToken();</span>
+
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">LPAREN)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">newDecleration</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">Parameters</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_id_list();</span>
+        <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">lexer.GetToken();</span>
+        <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">RPAREN)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">syntax_error();</span>
+        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">newDecleration;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">lexer.UngetToken(token);</span>
+    <span style="color: #f8f8f2">}</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">newDecleration;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">char</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_id_list()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">expect(ID);</span>
+
+    <span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">char</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">list;</span>
+
+    <span style="color: #f8f8f2">list.push_back(token.lexeme[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]);</span>
+
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">lexer.GetToken();</span>
+
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span><span style="color: #f92672">==</span><span style="color: #f8f8f2">COMMA){</span>
+        <span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">char</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">list2</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_id_list();</span>
+        <span style="color: #f8f8f2">list.insert(list.end(),list2.begin(),list2.end());</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">list;</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">lexer.UngetToken(token);</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">list;</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+
+<span style="color: #f8f8f2">stmt</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_start()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">expect(START);</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #a6e22e">parse_statement_list</span><span style="color: #f8f8f2">();</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">stmt</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_statement_list()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">stmt</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">head</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_statement();</span>
+
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">peek();</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">INPUT</span> <span style="color: #f92672">||</span> <span style="color: #f8f8f2">token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">ID)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">head</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_statement_list();</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">head;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">stmt</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_statement()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">peek();</span>
+    <span style="color: #f8f8f2">stmt</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">newStatement</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">stmt();</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">INPUT)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">newStatement</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">stmt_type</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">INPUT;</span>
+        <span style="color: #f8f8f2">newStatement</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">variable</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_input_statement();</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">newStatement;</span>
+    <span style="color: #f8f8f2">}</span>  <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">ID)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #a6e22e">parse_poly_evaluation_statement</span><span style="color: #f8f8f2">();</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">syntax_error();</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_input_statement()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+    <span style="color: #f8f8f2">expect(INPUT);</span>
+    <span style="color: #f8f8f2">index</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">allocateMemory(expect(ID).lexeme);</span>
+
+    <span style="color: #f8f8f2">expect(SEMICOLON);</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">index;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">stmt</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_poly_evaluation_statement()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">stmt</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">statement</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_polynomial_evaluation();</span>
+    <span style="color: #f8f8f2">expect(SEMICOLON);</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">statement;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">stmt</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_polynomial_evaluation()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">stmt</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">statement</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">stmt();</span>
+    <span style="color: #f8f8f2">poly</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">argList</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">poly();</span>
+
+    <span style="color: #f8f8f2">parse_polynomial_name();</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">lineNumber</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">token.line_no;</span>
+    <span style="color: #f8f8f2">argList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">Poly</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">for</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">poly_declerations.size();i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(poly_declerations[i].name</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">token.lexeme)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">argList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">Poly</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">i;</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(argList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">Poly</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">symantics_error(</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">);</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">lexer.GetToken();</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">LPAREN)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">syntax_error();</span>
+    <span style="color: #f8f8f2">}</span>
+
+
+    <span style="color: #f8f8f2">argList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">arguments</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_argument_list();</span>
+
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(argList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">Poly</span> <span style="color: #f92672">!=</span> <span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(poly_declerations[argList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">Poly].Parameters.size()</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">argList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">arguments.size()</span> <span style="color: #f92672">&amp;&amp;</span>
+            <span style="color: #f8f8f2">poly_declerations[argList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">Poly].Parameters.size()</span> <span style="color: #f92672">&gt;</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">errors[</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">].push_back(lineNumber);</span>
+        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(poly_declerations[argList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">Poly].Parameters.size()</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">0</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">argList</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">arguments.size()</span> <span style="color: #f92672">!=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">errors[</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">].push_back(lineNumber);</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">lexer.GetToken();</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">RPAREN)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">syntax_error();</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">statement</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">poly_eval</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">argList;</span>
+    <span style="color: #f8f8f2">statement</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">stmt_type</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">POLY;</span>
+    <span style="color: #f8f8f2">statement</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">variable</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">statement;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">poly_arg</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_argument_list()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">poly_arg</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">argumentList;</span>
+    <span style="color: #f8f8f2">argumentList.push_back(parse_argument());</span>
+
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">lexer.GetToken();</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">COMMA)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">poly_arg</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">newList</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_argument_list();</span>
+        <span style="color: #f8f8f2">argumentList.insert(argumentList.end(),newList.begin(),newList.end());</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">lexer.UngetToken(token);</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">argumentList;</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">poly_arg</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_argument()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">lexer.GetToken();</span>
+    <span style="color: #f8f8f2">Token</span> <span style="color: #f8f8f2">token2;</span>
+    <span style="color: #f8f8f2">poly_arg</span> <span style="color: #f8f8f2">newArg;</span>
+
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">ID)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">token2</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">lexer.GetToken();</span>
+        <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token2.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">LPAREN)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">lexer.UngetToken(token2);</span>
+            <span style="color: #f8f8f2">lexer.UngetToken(token);</span>
+            <span style="color: #f8f8f2">newArg.Type</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">POLY;</span>
+            <span style="color: #f8f8f2">newArg.poly_eval</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_polynomial_evaluation();</span>
+            <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">test</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">"asdf"</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">newArg.Type</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ID;</span>
+            <span style="color: #f8f8f2">newArg.value</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">newArg.poly_eval</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">NULL;</span>
+            <span style="color: #f8f8f2">newArg.index</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">findMemory(token.lexeme);</span>
+            <span style="color: #f8f8f2">lexer.UngetToken(token2);</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">NUM)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">syntax_error();</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">newArg.Type</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">NUM;</span>
+        <span style="color: #f8f8f2">newArg.value</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stoi(token.lexeme);</span>
+        <span style="color: #f8f8f2">newArg.poly_eval</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">NULL;</span>
+    <span style="color: #f8f8f2">}</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">newArg;</span>
+
+<span style="color: #f8f8f2">}</span>
+
+
+<span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_polynomial_name()</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">expect(ID);</span>
+    <span style="color: #f8f8f2">lineNumber</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">token.line_no;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">parse_inputs(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">inputs;</span>
+
+    <span style="color: #f8f8f2">expect(NUM);</span>
+
+    <span style="color: #f8f8f2">inputs.push_back(stoi(token.lexeme));</span>
+
+    <span style="color: #f8f8f2">token</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">lexer.GetToken();</span>
+
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">NUM)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">lexer.UngetToken(token);</span>
+        <span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">newList</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parse_inputs(i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">inputs.insert(inputs.end(),newList.begin(),newList.end());</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(token.token_type</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">END_OF_FILE)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">syntax_error();</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">inputs;</span>
+
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">void</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">execute_program(stmt</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">pStmt,</span> <span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">inputs)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">stmt</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">pc;</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">v</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">pc</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">pStmt;</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">next_input</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">memory[inputSize];</span>
+
+    <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">first</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">true;</span>
+    <span style="color: #66d9ef">while</span><span style="color: #f8f8f2">(pc</span> <span style="color: #f92672">!=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">switch</span><span style="color: #f8f8f2">(pc</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">stmt_type)</span> <span style="color: #f8f8f2">{</span>
+
+            <span style="color: #66d9ef">case</span><span style="color: #f8f8f2">(POLY)</span><span style="color: #f92672">:</span>
+                <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(first</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">false)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">first</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">false;</span>
+                <span style="color: #f8f8f2">}</span>
+
+                <span style="color: #f8f8f2">v</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">evaluate_polynomial(pc</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">poly_eval,</span> <span style="color: #f8f8f2">memory);</span>
+                <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">v;</span>
+                <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+
+            <span style="color: #66d9ef">case</span><span style="color: #f8f8f2">(INPUT)</span><span style="color: #f92672">:</span>
+                <span style="color: #f8f8f2">memory[pc</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">variable]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">inputs[next_input];</span>
+                <span style="color: #f8f8f2">next_input</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(pc</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next</span> <span style="color: #f92672">==</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">'\n'</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #f8f8f2">pc</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">pc</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">evaluate_polynomial(poly</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">pPoly,</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">memory[])</span> <span style="color: #f8f8f2">{</span>
+
+    <span style="color: #f8f8f2">poly_decleration</span> <span style="color: #f8f8f2">toEval</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">poly_declerations[pPoly</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">Poly];</span>
+    <span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">argumentIntegers;</span>
+
+    <span style="color: #66d9ef">for</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;i</span><span style="color: #f92672">&lt;</span><span style="color: #f8f8f2">pPoly</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">arguments.size();i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">switch</span><span style="color: #f8f8f2">(pPoly</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">arguments[i].Type)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">case</span> <span style="color: #f8f8f2">(NUM)</span><span style="color: #f92672">:</span>
+                <span style="color: #f8f8f2">argumentIntegers.push_back(pPoly</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">arguments[i].value);</span>
+                <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #66d9ef">case</span> <span style="color: #f8f8f2">(POLY)</span><span style="color: #f92672">:</span>
+                <span style="color: #f8f8f2">argumentIntegers.push_back(evaluate_polynomial(pPoly</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">arguments[i].poly_eval</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">poly_eval,</span> <span style="color: #f8f8f2">memory));</span>
+                <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #66d9ef">case</span><span style="color: #f8f8f2">(ID)</span><span style="color: #f92672">:</span>
+                <span style="color: #f8f8f2">argumentIntegers.push_back(memory[pPoly</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">arguments[i].index]);</span>
+                <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">test;</span>
+                <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">calculateCoeffecientList(toEval.body,argumentIntegers,</span> <span style="color: #f8f8f2">toEval.Parameters);</span>
+
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">findIndex(vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">char</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">parameters,</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">parameters.size();</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(parameters[i]</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">variable_table[index].symbol)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">i;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">calculateCoeffecient(coefficient</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">col,</span> <span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">argumentIntegers,vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">char</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">parameters)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(col</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">NULL)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">test</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">argumentIntegers[findIndex(parameters,</span> <span style="color: #f8f8f2">col</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">x)];</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #a6e22e">pow</span><span style="color: #f8f8f2">(argumentIntegers[findIndex(parameters,</span> <span style="color: #f8f8f2">col</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">x)],col</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">y)</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">calculateCoeffecient(col</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next,argumentIntegers,parameters);</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">Parser</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">calculateCoeffecientList(coefficient_list</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">body,vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">int</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">argumentIntegers,</span> <span style="color: #f8f8f2">vector</span><span style="color: #f92672">&lt;</span><span style="color: #66d9ef">char</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">parameters)</span> <span style="color: #f8f8f2">{</span>
+
+    <span style="color: #f8f8f2">coefficient_list</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">body</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">total</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">body</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">term</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">calculateCoeffecient(body</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">coLL,argumentIntegers,parameters);</span>
+    <span style="color: #f8f8f2">TokenType</span> <span style="color: #f8f8f2">sign</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">body</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">sign;</span>
+
+    <span style="color: #66d9ef">while</span><span style="color: #f8f8f2">(ptr</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">NULL)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">value</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">term</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">calculateCoeffecient(ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">coLL,</span> <span style="color: #f8f8f2">argumentIntegers,</span> <span style="color: #f8f8f2">parameters);</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(sign</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">PLUS)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">total</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">value;</span>
+        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(sign</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">MINUS)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">total</span> <span style="color: #f92672">-=</span> <span style="color: #f8f8f2">value;</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #f8f8f2">sign</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">sign;</span>
+
+        <span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">total;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #75715e">// Parsing</span>
+<span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">main()</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #75715e">//freopen("../input.txt", "r",stdin);</span>
+    <span style="color: #66d9ef">new</span> <span style="color: #a6e22e">Parser</span><span style="color: #f8f8f2">();</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>

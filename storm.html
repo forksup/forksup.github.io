@@ -7,7 +7,7 @@
    <!--- Basic Page Needs
    ================================================== -->
    <meta charset="utf-8">
-	<title>mitchell.rocks - Storm Analysis</title>
+	<title>mitchell.rocks - Storm Project</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -43,7 +43,7 @@
 
          <ul id="nav" class="nav">
             <li><a class="smoothscroll" href="index.html#portfolio">Home</a></li>
-            <li class="current"><a class="smoothscroll" href="#top" id="inactiveLink">Book Playlist Project</a></li>
+            <li class="current"><a class="smoothscroll" href="#top" id="inactiveLink">Sea Ice Project</a></li>
          </ul> <!-- end #nav -->
 
       </nav> <!-- end #nav-wrap -->
@@ -57,55 +57,62 @@
 
          <div class="twelve columns">
 
-            <h1>CSE 412 Book Playlist Project</h1>
+            <h1>CSE 310 Storm Analysis</h1>
 
-            <p class="lead add-bottom">For CSE 412: Database management we were tasked with seelcting an existing data set, and importing it into our own Postgres SQL database to be used as part of a web app. We decided to create an online book playlist project utilizing a large book database provided by <a href="https://www.goodreads.com/">Goodreads.</a> Our project can be found <a href="https://ebook-ce845.web.app/">here</a>.
+            <p class="lead add-bottom">This is the 2nd project for my CSE 310 Data Structures class completed in the fall semester of 2019. The project required use to create a graph representation of a climatoloical data set. We utilized a storm data set provided by the National Weather Service (NWS). A full description of the project can be found <a href="310/p2.pdf">here</a>.</p>
 
-            </p>
+            <h3>About the project</h3>
+            <p class>
+            This project focuses around a few important data structures: Hash tables, arrays, linked lists, max-heaps, and binary search trees. We were tasked with parsing large lists of storm data, then building data structures around the given data. Hash tables were used to reduce search times, as well as heaps and binary search trees.</p>
 
-            <h3>About the Project</h3>
-            <p class="big">
+            Data Structures Utilized
+            <ul class="disc">
+               <li>Hash Table</li>
+               <li>Max Heap</li>
+               <li>Binary Tree</li>
+            </ul>
 
-            In this project we create a webapp where users can search a library and save books in their favorite lists. Once a favorites list is created the app will recommend a new book. The technologies used:
-            </p>
+            <p>
+            After loading all the data into varying data structures, queries can be executed. There are several queries such as <code>find max fatality</code> and <code>range</code> which utilize data structures most effecient for their purpose. For example, <code>range</code> uses a binary search stree. Since this command requires easy access to a range of values with a low and high this data structure is ideal. Another example is <code>find max fatality</code> which builds a max-heap since it needs access to the storms with the most fatalities. A description of all of these commands can be found in p3 of the <a href="310/p2.pdf">project requirements</a></p>
 
-            <ul class="disc big">
-               <li>PostgresSQL</li>
-               <li>Bootstrap</li>
-               <li>React</li>
-               <li>Node</li>
-            </ul>     
+            Objectives
+            <ul class="disc">
+               <li>Use a large data set to demonstrate comprehension of varying data structures to reduce time complexity for searches and other data analysis.</li>
+               <li>Calculate Chain length as well as count for the storm linked lists</li>
+               <li>Calculate the load factor</li>
+            </ul>
+            
 
-            <p class="big">
-            To make this proccess more simple we opted for a passwordless login page. Visitors may enter the site and select create to generate a new user id, or enter in any other user id to view their stored data. This is for display purposes mostly.
-            </p>
 
+            <h3>The Code</h3>
             <div class="center">
-               <img src="images/login.PNG" width=60%>
+
+               <embed src="310/storm.html" type="text/html" width="100%" height="1000px">
+               <a href="https://github.com/forksup/CSE310-Project-2-Storm-Analysis" class="box big">Find full code on <img src="images/github.png" width="75px"></a>
+
+
             </div>
-
-
-            <p class="big">
-            Our webapp allows users to search our database and save books by adding them to their favorites list:
-            </p>
-
-            <div class="center">
-               <img src="images/search.PNG" width=100%>
-            </div>
-
-            <p class="big">
-            After a user adds items to their favorites list, the can select the recommend button which will analyze their favorite books and recommend a new one. Our app analyzes users with similar favorite books and recommends new ones from their lists.
-            </p>
-
-            <div class="center">
-               <img src="images/recommend.PNG" width=80%>
-            </div>
-            <hr>
 
          </div>
 
       </div> <!-- Row End-->
 
+      <div class="row add-bottom">
+
+         <div class="twelve columns">
+
+
+            <div class=>
+               <h3>Results (program output)</h3>
+
+               <embed src="310/p3output.txt"  width="100%" height="1000px">
+
+            </div>
+         </div>
+
+         </div>
+
+      </div> <!-- Row End-->
 
       
    <!-- footer

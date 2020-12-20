@@ -1,0 +1,919 @@
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;iostream&gt;</span>
+<span style="color: #75715e">#include</span> <span style="color: #75715e">"defn.h"</span>
+<span style="color: #75715e">#include</span> <span style="color: #75715e">"prime.cc"</span>
+<span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;fstream&gt;</span>
+<span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;cstring&gt;</span>
+<span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;sstream&gt;</span>
+
+<span style="color: #66d9ef">using</span> <span style="color: #66d9ef">namespace</span> <span style="color: #f8f8f2">std;</span>
+
+<span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">storm_data_path</span> <span style="color: #f92672">=</span>  <span style="color: #e6db74">"details-"</span><span style="color: #f8f8f2">;</span>
+<span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">fatality_data_path</span> <span style="color: #f92672">=</span>  <span style="color: #e6db74">"fatalities-"</span><span style="color: #f8f8f2">;</span>
+<span style="color: #66d9ef">char</span> <span style="color: #f8f8f2">delimChar</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">'\n'</span><span style="color: #f8f8f2">;</span>
+
+
+<span style="color: #75715e">//Keeps track of which year is at which index of the storm array</span>
+<span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">hashTableSize</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #a6e22e">hashEventID</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">event_id)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">((</span><span style="color: #66d9ef">int</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">event_id</span> <span style="color: #f92672">%</span> <span style="color: #f8f8f2">hashTableSize);</span>
+<span style="color: #f8f8f2">}</span>
+
+
+<span style="color: #75715e">//the two set value functions are used for assigning string values to the various data types of the fatality and storm event</span>
+<span style="color: #66d9ef">void</span> <span style="color: #a6e22e">setValue</span><span style="color: #f8f8f2">(storm_event</span> <span style="color: #f92672">&amp;</span><span style="color: #f8f8f2">storm_object,</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">valueIndex,</span> <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">value)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">switch</span><span style="color: #f8f8f2">(valueIndex)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">0</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//event_id</span>
+            <span style="color: #f8f8f2">storm_object.event_id</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stoi(value);</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">1</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//state</span>
+            <span style="color: #66d9ef">char</span> <span style="color: #f8f8f2">state[</span><span style="color: #ae81ff">15</span><span style="color: #f8f8f2">];</span>
+            <span style="color: #f8f8f2">strcpy(storm_object.state,</span> <span style="color: #f8f8f2">value.c_str());</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">2</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//year</span>
+            <span style="color: #f8f8f2">storm_object.year</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stoi(value);</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">3</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//month</span>
+            <span style="color: #f8f8f2">strcpy(storm_object.month_name,</span> <span style="color: #f8f8f2">value.c_str());</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">4</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//event_type</span>
+            <span style="color: #f8f8f2">strcpy(storm_object.event_type,</span> <span style="color: #f8f8f2">value.c_str());</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">5</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//cz_type</span>
+            <span style="color: #f8f8f2">storm_object.cz_type</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">value[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">];</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">6</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//cz_name</span>
+            <span style="color: #f8f8f2">strcpy(storm_object.cz_name,</span> <span style="color: #f8f8f2">value.c_str());</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">7</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//injuries_direct</span>
+            <span style="color: #f8f8f2">storm_object.injuries_direct</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stoi(value);</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">8</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//injuries_indirect</span>
+            <span style="color: #f8f8f2">storm_object.injuries_indirect</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stoi(value);</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">9</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//deaths_direct</span>
+            <span style="color: #f8f8f2">storm_object.deaths_direct</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stoi(value);</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">10</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//deaths_indirect</span>
+            <span style="color: #f8f8f2">storm_object.deaths_indirect</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stoi(value);</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">11</span><span style="color: #f92672">:</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #75715e">//damage_property</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(value</span> <span style="color: #f92672">!=</span> <span style="color: #e6db74">"0"</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">value[value.length()</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">' '</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">val</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">std</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">stof(value)</span> <span style="color: #f92672">*</span> <span style="color: #ae81ff">1000</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">storm_object.damage_property</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">int</span><span style="color: #f8f8f2">(val);</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">12</span><span style="color: #f92672">:</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #75715e">//damage_crops</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(value</span> <span style="color: #f92672">!=</span> <span style="color: #e6db74">"0"</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">value[value.length()</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">' '</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">val</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">std</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">stof(value)</span> <span style="color: #f92672">*</span> <span style="color: #ae81ff">1000</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">storm_object.damage_crops</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">int</span><span style="color: #f8f8f2">(val);</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">13</span><span style="color: #f92672">:</span>
+            <span style="color: #f8f8f2">strcpy(storm_object.tor_f_scale,</span> <span style="color: #f8f8f2">value.c_str());</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+<span style="color: #66d9ef">void</span> <span style="color: #a6e22e">setValue</span><span style="color: #f8f8f2">(fatality_event</span> <span style="color: #f92672">&amp;</span><span style="color: #f8f8f2">fality_object,</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">valueIndex,</span> <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">value)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">switch</span><span style="color: #f8f8f2">(valueIndex)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">0</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//fatality_id</span>
+            <span style="color: #f8f8f2">fality_object.fatality_id</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stoi(value);</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">1</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//event_id</span>
+            <span style="color: #f8f8f2">fality_object.event_id</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stoi(value);</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">2</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//fatality_type</span>
+            <span style="color: #f8f8f2">fality_object.fatality_type</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">value[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">];</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">3</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//fatality_date</span>
+            <span style="color: #f8f8f2">strcpy(fality_object.fatality_date,</span> <span style="color: #f8f8f2">value.c_str());</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">4</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//fatality_age</span>
+            <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(value</span> <span style="color: #f92672">!=</span> <span style="color: #e6db74">""</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">fality_object.fatality_age</span> <span style="color: #f92672">=</span>  <span style="color: #f8f8f2">stoi(value);</span>
+            <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">fality_object.fatality_age</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">4</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">}</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">5</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//fatality_sex</span>
+            <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(value</span> <span style="color: #f92672">!=</span> <span style="color: #e6db74">""</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">fality_object.fatality_sex</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">value[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">];</span>
+            <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">fality_object.fatality_sex</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">' '</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">}</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">case</span> <span style="color: #ae81ff">6</span><span style="color: #f92672">:</span>
+            <span style="color: #75715e">//fatality_location</span>
+            <span style="color: #f8f8f2">strcpy(fality_object.fatality_location,</span> <span style="color: #f8f8f2">value.c_str());</span>
+            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #75715e">// To heapify a subtree rooted with node i which is</span>
+<span style="color: #75715e">// an index in arr[]. n is size of heap</span>
+<span style="color: #66d9ef">void</span> <span style="color: #a6e22e">heapify</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">arr[][</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">],</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">n,</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i)</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">largest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">i;</span> <span style="color: #75715e">// Initialize largest as root</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">2</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span> <span style="color: #75715e">// left = 2*i + 1</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">r</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">2</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">;</span> <span style="color: #75715e">// right = 2*i + 2</span>
+
+    <span style="color: #75715e">// If left child is larger than root</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(l</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">n</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">arr[l][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">arr[largest][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">])</span>
+        <span style="color: #f8f8f2">largest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">l;</span>
+
+    <span style="color: #75715e">// If right child is larger than largest so far</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(r</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">n</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">arr[r][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">arr[largest][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">])</span>
+        <span style="color: #f8f8f2">largest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">r;</span>
+
+    <span style="color: #75715e">// If largest is not root</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(largest</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">i)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">swap(arr[i],</span> <span style="color: #f8f8f2">arr[largest]);</span>
+
+        <span style="color: #75715e">// Recursively heapify the affected sub-tree</span>
+        <span style="color: #f8f8f2">heapify(arr,</span> <span style="color: #f8f8f2">n,</span> <span style="color: #f8f8f2">largest);</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">void</span> <span style="color: #a6e22e">heapify</span><span style="color: #f8f8f2">(storm_event</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">arr[],</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">n,</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i,</span><span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">state)</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">largest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">i;</span> <span style="color: #75715e">// Initialize largest as root</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">2</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span> <span style="color: #75715e">// left = 2*i + 1</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">r</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">2</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">;</span> <span style="color: #75715e">// right = 2*i + 2</span>
+
+    <span style="color: #75715e">//check to see if fields are equal, if so sort by event id, otherwise sort by field</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(state)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(arr[l]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">state</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">arr[largest]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">state)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #75715e">// If left child is larger than root</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(l</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">n</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">arr[l]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">arr[largest]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id)</span>
+                <span style="color: #f8f8f2">largest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">l;</span>
+
+            <span style="color: #75715e">// If right child is larger than largest so far</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(r</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">n</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">arr[r]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">arr[largest]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id)</span>
+                <span style="color: #f8f8f2">largest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">r;</span>
+        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #75715e">// If left child is larger than root</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(l</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">n</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">arr[l]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">state</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">arr[largest]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">state)</span>
+                <span style="color: #f8f8f2">largest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">l;</span>
+
+            <span style="color: #75715e">// If right child is larger than largest so far</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(r</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">n</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">arr[r]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">state</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">arr[largest]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">state)</span>
+                <span style="color: #f8f8f2">largest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">r;</span>
+        <span style="color: #f8f8f2">}</span>
+
+
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(arr[l]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">month_name</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">arr[largest]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">month_name)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #75715e">// If left child is larger than root</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(l</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">n</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">arr[l]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">arr[largest]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id)</span>
+                <span style="color: #f8f8f2">largest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">l;</span>
+
+            <span style="color: #75715e">// If right child is larger than largest so far</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(r</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">n</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">arr[r]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">arr[largest]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id)</span>
+                <span style="color: #f8f8f2">largest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">r;</span>
+        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #75715e">// If left child is larger than root</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(l</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">n</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">arr[l]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">month_name</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">arr[largest]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">month_name)</span>
+                <span style="color: #f8f8f2">largest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">l;</span>
+
+            <span style="color: #75715e">// If right child is larger than largest so far</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(r</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">n</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">arr[r]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">month_name</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">arr[largest]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">month_name)</span>
+                <span style="color: #f8f8f2">largest</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">r;</span>
+        <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">// If largest is not root</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(largest</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">i)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">swap(arr[i],</span> <span style="color: #f8f8f2">arr[largest]);</span>
+
+        <span style="color: #75715e">// Recursively heapify the affected sub-tree</span>
+        <span style="color: #f8f8f2">heapify(arr,</span> <span style="color: #f8f8f2">n,</span> <span style="color: #f8f8f2">largest,</span> <span style="color: #f8f8f2">state);</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #75715e">// main function to do heap sort</span>
+<span style="color: #66d9ef">void</span> <span style="color: #a6e22e">heapSort</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">arr[][</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">],</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">n)</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #75715e">// Build heap (rearrange array)</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">n</span> <span style="color: #f92672">/</span> <span style="color: #ae81ff">2</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&gt;=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">--</span><span style="color: #f8f8f2">)</span>
+        <span style="color: #f8f8f2">heapify(arr,</span> <span style="color: #f8f8f2">n,</span> <span style="color: #f8f8f2">i);</span>
+
+    <span style="color: #75715e">// One by one extract an element from heap</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">n</span><span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">&gt;=</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">--</span><span style="color: #f8f8f2">)</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #75715e">// Move current root to end</span>
+        <span style="color: #f8f8f2">swap(arr[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">arr[i]);</span>
+
+        <span style="color: #75715e">// call max heapify on the reduced heap</span>
+        <span style="color: #f8f8f2">heapify(arr,</span> <span style="color: #f8f8f2">i,</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">);</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">void</span> <span style="color: #a6e22e">inOrderTraversal</span><span style="color: #f8f8f2">(bst</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">node,</span> <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">high,</span> <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">low,</span> <span style="color: #f8f8f2">hash_table_entry</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">hashTable[],</span> <span style="color: #f8f8f2">annual_storms</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">stormArray[],</span> <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">state)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #75715e">//In order traversal is left subtree</span>
+    <span style="color: #75715e">// root</span>
+    <span style="color: #75715e">// Then Right subtree</span>
+
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(node</span> <span style="color: #f92672">!=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #75715e">//Left Subtree recursion</span>
+        <span style="color: #f8f8f2">inOrderTraversal(node</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">left,</span> <span style="color: #f8f8f2">high,</span> <span style="color: #f8f8f2">low,</span> <span style="color: #f8f8f2">hashTable,</span> <span style="color: #f8f8f2">stormArray,</span> <span style="color: #f8f8f2">state);</span>
+
+        <span style="color: #75715e">//Check if the node is within bounds, if so then locate the storm event in the storm Array and print it's info</span>
+        <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(high.compare(node</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">s)</span> <span style="color: #f92672">&gt;=</span> <span style="color: #ae81ff">0</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">low.compare(node</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">s)</span> <span style="color: #f92672">&lt;=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">hash_table_entry</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">hashTable[hashEventID(node</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id)];</span>
+
+            <span style="color: #66d9ef">while</span><span style="color: #f8f8f2">(ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">node</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">m;</span>
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(m</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year;</span> <span style="color: #f8f8f2">m</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{}</span>
+
+            <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(state)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"State: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index].state</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+            <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Month Name: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index].month_name</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Event ID:   "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index].event_id</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" "</span><span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl</span> <span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Year:       "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index].year</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Event Type: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index].event_type</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"CZ Type:    "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index].cz_type</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl</span><span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #75715e">//Right Subtree recursion</span>
+        <span style="color: #f8f8f2">inOrderTraversal(node</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">right,</span> <span style="color: #f8f8f2">high,</span> <span style="color: #f8f8f2">low,</span> <span style="color: #f8f8f2">hashTable,stormArray,</span> <span style="color: #f8f8f2">state);</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">bst</span><span style="color: #f92672">*</span> <span style="color: #a6e22e">buildBST</span><span style="color: #f8f8f2">(storm_event</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">arr[],</span> <span style="color: #f8f8f2">bst</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">root,</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i,</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">n,</span> <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">state)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">n)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">bst</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">temp</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">bst;</span>
+        <span style="color: #f8f8f2">temp</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">arr[i]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id;</span>
+        <span style="color: #f8f8f2">temp</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">left</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">temp</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">right</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(state)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">temp</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">s</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">arr[i]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">state;</span>
+        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">temp</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">s</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">arr[i]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">month_name;</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #f8f8f2">root</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">temp;</span>
+
+        <span style="color: #75715e">// insert left child</span>
+        <span style="color: #f8f8f2">root</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">left</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">buildBST(arr,</span> <span style="color: #f8f8f2">root</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">left,</span> <span style="color: #ae81ff">2</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">n,state);</span>
+
+        <span style="color: #75715e">// insert right child</span>
+        <span style="color: #f8f8f2">root</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">right</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">buildBST(arr,</span> <span style="color: #f8f8f2">root</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">right,</span> <span style="color: #ae81ff">2</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">n,state);</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">root;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #a6e22e">countBST</span><span style="color: #f8f8f2">(bst</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">root)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(root)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">1</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">countBST(root</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">left)</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">countBST(root</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">right);</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #a6e22e">findBSTHeight</span><span style="color: #f8f8f2">(bst</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">node)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(node</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">NULL)</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">else</span>
+        <span style="color: #f8f8f2">{</span>
+            <span style="color: #75715e">/* compute the depth of each subtree */</span>
+            <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">lDepth</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">findBSTHeight(node</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">left);</span>
+            <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">rDepth</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">findBSTHeight(node</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">right);</span>
+
+            <span style="color: #75715e">/* use the larger one */</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(lDepth</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">rDepth)</span>
+                <span style="color: #66d9ef">return</span><span style="color: #f8f8f2">(lDepth</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">);</span>
+            <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">return</span><span style="color: #f8f8f2">(rDepth</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">void</span> <span style="color: #a6e22e">clearTree</span><span style="color: #f8f8f2">(bst</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">root)</span>
+<span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(root</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">NULL)</span> <span style="color: #f8f8f2">{</span> <span style="color: #66d9ef">return</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">clearTree(root</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">left);</span>
+    <span style="color: #f8f8f2">clearTree(root</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">right);</span>
+    <span style="color: #f8f8f2">free(root);</span>
+<span style="color: #f8f8f2">}</span>
+
+
+<span style="color: #66d9ef">int</span> <span style="color: #a6e22e">countMaxHeapHeight</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">arr[][</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">],</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">n,</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i)</span> <span style="color: #f8f8f2">{</span>
+
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">n</span><span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">2</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">r</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">2</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">lDepth</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">countMaxHeapHeight(arr,</span> <span style="color: #f8f8f2">n,l);</span>
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">rDepth</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">countMaxHeapHeight(arr,</span> <span style="color: #f8f8f2">n,r);</span>
+
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(lDepth</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">rDepth)</span>
+            <span style="color: #66d9ef">return</span><span style="color: #f8f8f2">(lDepth</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">);</span>
+        <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">return</span><span style="color: #f8f8f2">(rDepth</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">);</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+
+
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #a6e22e">countMaxHeap</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">arr[][</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">],</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">n,</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">n</span><span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">2</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">r</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">2</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">1</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">countMaxHeap(arr,n,l)</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">countMaxHeap(arr,n,r);</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #a6e22e">main</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">argc,</span> <span style="color: #66d9ef">char</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">argv[])</span> <span style="color: #f8f8f2">{</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">fatalityCount</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">stormcount</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stoi(argv[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]);</span>
+
+    <span style="color: #75715e">//Make sure all the years are inputted</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(stormcount</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">argc</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">cerr</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Invalid amount of arguments"</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">//first count storm events</span>
+    <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">line;</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">stormCount[stormcount];</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormcount;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">stormCount[i]</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">//Loop through all files, count events to be able to allocate hash and annual_storm data structures</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormcount</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">stormData</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">storm_data_path</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">argv[i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">".csv"</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">ifstream</span> <span style="color: #f8f8f2">stormFile(stormData);</span>
+
+        <span style="color: #75715e">//Subtract one from total count for the first template line in each storm file</span>
+        <span style="color: #f8f8f2">hashTableSize</span><span style="color: #f92672">--</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(getline(stormFile,</span> <span style="color: #f8f8f2">line,</span> <span style="color: #f8f8f2">delimChar))</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">stormCount[i</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">hashTableSize</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">stormSize</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">hashTableSize;</span>
+    <span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">annual_storms</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">stormArray[stormcount];</span>
+
+    <span style="color: #75715e">//Use this for loop to find the first prime larger than the sum of the count of storm events in each file</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(hashTableSize</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">2</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">hashTableSize;</span> <span style="color: #f92672">!</span><span style="color: #f8f8f2">TestForPrime(hashTableSize);</span> <span style="color: #f8f8f2">hashTableSize</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{}</span>
+    <span style="color: #f8f8f2">hash_table_entry</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">hashTable[hashTableSize];</span> <span style="color: #75715e">// Don't forget to delete [] a; when you're done!</span>
+
+    <span style="color: #75715e">//Initilize hashtable and stormarray to null</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">hashTableSize;</span> <span style="color: #f8f8f2">hashTable[i]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">NULL,</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{}</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormcount;</span> <span style="color: #f8f8f2">stormArray[i]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">NULL,</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{}</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">count;</span>
+
+    <span style="color: #75715e">//Loop through and parse each storm5</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormcount</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">filepath</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">storm_data_path</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">argv[i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">".csv"</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">ifstream</span> <span style="color: #f8f8f2">stormFile(filepath);</span>
+
+        <span style="color: #f8f8f2">storm_event</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">stormYearArray</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">storm_event[stormCount[i</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]];</span>
+
+        <span style="color: #f8f8f2">count</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #75715e">//Loop through each storm line and parse each storm</span>
+        <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(getline(stormFile,</span> <span style="color: #f8f8f2">line))</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(count</span> <span style="color: #f92672">!=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">storm_event</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">storm_struct</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">storm_event;</span>
+
+                <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">indexValue</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">input;</span>
+
+                <span style="color: #f8f8f2">std</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">stringstream</span> <span style="color: #f8f8f2">sStream(line);</span>
+
+                <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(getline(sStream,</span> <span style="color: #f8f8f2">input,</span> <span style="color: #e6db74">','</span><span style="color: #f8f8f2">))</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">setValue(</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">storm_struct,</span> <span style="color: #f8f8f2">indexValue</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">input);</span>
+                <span style="color: #f8f8f2">}</span>
+
+                <span style="color: #f8f8f2">storm_struct</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">f</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">NULL;</span>
+
+                <span style="color: #75715e">//Get the index of the event using hashEventID, then insert the storm into the hash table</span>
+                <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">spot</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">hashEventID(storm_struct</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id);</span>
+                <span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">hash_table_entry</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">newentry</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">hash_table_entry</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #f8f8f2">newentry</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">storm_struct</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id;</span>
+                <span style="color: #f8f8f2">newentry</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">storm_struct</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year;</span>
+                <span style="color: #f8f8f2">newentry</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">count</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #f8f8f2">newentry</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">NULL;</span>
+
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(hashTable[spot]</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">NULL)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">hash_table_entry</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">hashTable[spot];</span>
+
+                    <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">NULL)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+                    <span style="color: #f8f8f2">}</span>
+
+                    <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">newentry;</span>
+
+                <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">hashTable[spot]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">newentry;</span>
+                <span style="color: #f8f8f2">}</span>
+
+                <span style="color: #75715e">//Insert the storm struct into the storm array</span>
+                <span style="color: #f8f8f2">stormYearArray[count</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">storm_struct;</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #f8f8f2">count</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #75715e">//Allocate memory for a new annual_storms event then insert into the annual_storms array for this year</span>
+        <span style="color: #f8f8f2">annual_storms</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">storm</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">annual_storms;</span>
+        <span style="color: #f8f8f2">storm</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormYearArray[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">].year;</span>
+        <span style="color: #f8f8f2">storm</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormYearArray;</span>
+        <span style="color: #f8f8f2">stormArray[i</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">storm;</span>
+
+        <span style="color: #75715e">//Build the path to the fatality file</span>
+        <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">fatalityData</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">fatality_data_path</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">argv[i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">".csv"</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">std</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">ifstream</span> <span style="color: #f8f8f2">fatalityFile(fatalityData.c_str());</span>
+
+        <span style="color: #75715e">//Set to avoid running on the first template line of each fatalityFile</span>
+        <span style="color: #f8f8f2">count</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #75715e">//Loop through fatality files</span>
+        <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(getline(fatalityFile,</span> <span style="color: #f8f8f2">line,</span> <span style="color: #f8f8f2">delimChar))</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(count</span> <span style="color: #f92672">!=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">fatality_event</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">fatalEvent</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">fatality_event;</span>
+                <span style="color: #f8f8f2">fatalEvent</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">NULL;</span>
+
+                <span style="color: #f8f8f2">fatalityCount</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+
+                <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">result</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">""</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">indexValue</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+                <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">line.length();</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(line[j]</span> <span style="color: #f92672">!=</span> <span style="color: #e6db74">','</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">result</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">line[j];</span>
+                    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">setValue(</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">fatalEvent,</span> <span style="color: #f8f8f2">indexValue</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">result);</span>
+                        <span style="color: #f8f8f2">result</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">""</span><span style="color: #f8f8f2">;</span>
+                    <span style="color: #f8f8f2">}</span>
+                <span style="color: #f8f8f2">}</span>
+
+                <span style="color: #f8f8f2">hash_table_entry</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">hash</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">hashTable[hashEventID(fatalEvent</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id)];</span>
+
+                <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">;</span>
+
+                <span style="color: #75715e">//Find which chain the storm event is at</span>
+                <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(index</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(hash</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">fatalEvent</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">index</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">hash</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index;</span>
+                    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">hash</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">hash</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+                    <span style="color: #f8f8f2">}</span>
+                <span style="color: #f8f8f2">}</span>
+
+                <span style="color: #75715e">//Find l, the index of the year of the event</span>
+                <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">stormArray[l]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">hash</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year;</span> <span style="color: #f8f8f2">l</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{}</span>
+
+                <span style="color: #75715e">//Insert the fatality event into the head of the fatality linked list</span>
+                <span style="color: #f8f8f2">fatalEvent</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormArray[l]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[index].f;</span>
+                <span style="color: #f8f8f2">stormArray[l]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[index].f</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">fatalEvent;</span>
+            <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">count</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">//Parsing of all the data is complete. Now move into the queries</span>
+
+    <span style="color: #75715e">//Take in the amount of commands to be ran</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">cmdCount;</span>
+    <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">inputStr;</span>
+    <span style="color: #f8f8f2">getline(cin,</span> <span style="color: #f8f8f2">inputStr);</span>
+
+    <span style="color: #f8f8f2">cmdCount</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stoi(inputStr);</span>
+
+    <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">command_type</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">""</span><span style="color: #f8f8f2">;</span>
+
+    <span style="color: #75715e">//Run a for loop fore ach command ran</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">z</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">z</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">cmdCount;</span> <span style="color: #f8f8f2">z</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">getline(cin,</span> <span style="color: #f8f8f2">inputStr);</span>
+
+        <span style="color: #75715e">//find max fatality 3</span>
+        <span style="color: #75715e">//true for range</span>
+        <span style="color: #75715e">//false for find</span>
+        <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">commandCode</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">NULL;</span>
+        <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">result;</span>
+
+        <span style="color: #f8f8f2">string</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">arguments</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">string[</span><span style="color: #ae81ff">5</span><span style="color: #f8f8f2">];</span>
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">argCount</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">inputStr.length();</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(inputStr[j]</span> <span style="color: #f92672">!=</span> <span style="color: #e6db74">' '</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">result</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">inputStr[j];</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(inputStr[j]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">' '</span> <span style="color: #f92672">||</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">inputStr.length()</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(j</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">6</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #f92672">!</span><span style="color: #f8f8f2">commandCode)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(result</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">"range"</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">commandCode</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">true;</span>
+                        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">commandCode</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">false;</span>
+                        <span style="color: #f8f8f2">}</span>
+                        <span style="color: #f8f8f2">result</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">""</span><span style="color: #f8f8f2">;</span>
+                    <span style="color: #f8f8f2">}</span>
+                <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">arguments[argCount]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">result;</span>
+                    <span style="color: #f8f8f2">argCount</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+                    <span style="color: #f8f8f2">result</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">""</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #75715e">//Find command</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #f92672">!</span><span style="color: #f8f8f2">commandCode)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l[</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span><span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">};</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(arguments[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">"event"</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+
+                <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">hashEventID(stoi(arguments[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]));</span>
+                <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(index</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">hashTableSize</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">index</span> <span style="color: #f92672">&gt;</span> <span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">hash_table_entry</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">hashTable[index];</span>
+                    <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(ptr</span> <span style="color: #f92672">!=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">stoi(arguments[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]))</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">l[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index;</span>
+                            <span style="color: #f8f8f2">l[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year;</span>
+                            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+                        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+                        <span style="color: #f8f8f2">}</span>
+                    <span style="color: #f8f8f2">}</span>
+                <span style="color: #f8f8f2">}</span>
+
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(l[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">-1</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Storm event "</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">arguments[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">" not found."</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #75715e">//Get the searched for storm event</span>
+
+                    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j;</span>
+                    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">stormArray[j]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">l[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">];</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{}</span>
+
+                    <span style="color: #f8f8f2">storm_event</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">event</span> <span style="color: #f92672">=</span> <span style="color: #f92672">&amp;</span><span style="color: #f8f8f2">stormArray[j]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[l[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]];</span>
+
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"=== Storm Info ==="</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Event ID:          "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Year:              "</span> <span style="color: #f92672">&lt;&lt;</span><span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Month:             "</span> <span style="color: #f92672">&lt;&lt;</span><span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">month_name</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Event Type:        "</span> <span style="color: #f92672">&lt;&lt;</span><span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_type</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"CZ Type:           "</span> <span style="color: #f92672">&lt;&lt;</span><span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">cz_type</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"CZ Name:           "</span> <span style="color: #f92672">&lt;&lt;</span><span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">cz_name</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Injuries Direct:   "</span> <span style="color: #f92672">&lt;&lt;</span><span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">injuries_direct</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Injuries Indirect: "</span> <span style="color: #f92672">&lt;&lt;</span><span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">injuries_indirect</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Deaths Direct:     "</span> <span style="color: #f92672">&lt;&lt;</span><span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">deaths_direct</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Deaths Indirect:   "</span> <span style="color: #f92672">&lt;&lt;</span><span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">deaths_indirect</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Damage Property:   "</span> <span style="color: #f92672">&lt;&lt;</span><span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">damage_property</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Damage Crops:      "</span> <span style="color: #f92672">&lt;&lt;</span><span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">damage_crops</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Tor F Scale:       "</span> <span style="color: #f92672">&lt;&lt;</span><span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">tor_f_scale</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Deaths Direct:     "</span> <span style="color: #f92672">&lt;&lt;</span><span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">deaths_direct</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+                    <span style="color: #f8f8f2">fatality_event</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">fat</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">event</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">f;</span>
+
+                    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(fat</span> <span style="color: #f92672">==</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"No fatalities"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"=== Fatalities ==="</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">}</span>
+
+                    <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(fat</span> <span style="color: #f92672">!=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Fatality ID: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">fatality_id</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Type:        "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">fatality_type</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Date:        "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">fatality_date</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Age:         "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">fatality_age</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Sex:         "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">fatality_sex</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Location:    "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">fatality_location</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                        <span style="color: #f8f8f2">fat</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+                    <span style="color: #f8f8f2">}</span>
+
+                <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(arguments[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">"max"</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(arguments[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">"fatality"</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">m;</span>
+
+                    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+                    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">fatalitySize;</span>
+
+                    <span style="color: #75715e">//Decode the amount of elements to be in the fatality data array</span>
+                    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(arguments[</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">"all"</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">fatalitySize</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormSize;</span>
+                    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(m</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">stoi(arguments[</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">])</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year;</span> <span style="color: #f8f8f2">m</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{}</span>
+                        <span style="color: #f8f8f2">fatalitySize</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormCount[m];</span>
+                    <span style="color: #f8f8f2">}</span>
+
+                    <span style="color: #75715e">//Declare array to store fatality data to later heapify</span>
+                    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">fatalityData[fatalitySize][</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">];</span>
+
+                    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">fatalitySize;j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">fatalityData[j][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+                    <span style="color: #f8f8f2">}</span>
+
+                    <span style="color: #75715e">//For all argument loop through and put every fatality in the array</span>
+                    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(arguments[</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">"all"</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormcount;</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormCount[j];</span> <span style="color: #f8f8f2">l</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                                <span style="color: #f8f8f2">fatality_event</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">fat</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormArray[j]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[l].f;</span>
+
+                                <span style="color: #f8f8f2">fatalityData[index][</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormArray[j]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[l].event_id;</span>
+
+                                <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(fat</span> <span style="color: #f92672">!=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                                    <span style="color: #f8f8f2">fatalityData[index][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+                                    <span style="color: #f8f8f2">fat</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+                                <span style="color: #f8f8f2">}</span>
+
+                                <span style="color: #f8f8f2">index</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+                            <span style="color: #f8f8f2">}</span>
+                        <span style="color: #f8f8f2">}</span>
+                    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #75715e">//Fill the fatality data with only the requested year</span>
+                        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormCount[m];</span> <span style="color: #f8f8f2">l</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">fatality_event</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">fat</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[l].f;</span>
+
+                            <span style="color: #f8f8f2">fatalityData[index][</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[l].event_id;</span>
+
+                            <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(fat</span> <span style="color: #f92672">!=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                                <span style="color: #f8f8f2">fatalityData[index][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+                                <span style="color: #f8f8f2">fat</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+                            <span style="color: #f8f8f2">}</span>
+
+                            <span style="color: #f8f8f2">index</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+
+                        <span style="color: #f8f8f2">}</span>
+
+                    <span style="color: #f8f8f2">}</span>
+
+                    <span style="color: #f8f8f2">heapSort(fatalityData,</span> <span style="color: #f8f8f2">fatalitySize);</span>
+
+                    <span style="color: #75715e">//Loop through the given n most fatal events and print the info</span>
+                    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stoi(arguments[</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">]);</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">hash_table_entry</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">hashTable[hashEventID(fatalityData[fatalitySize</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">])];</span>
+
+                        <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">fatalityData[fatalitySize</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">j][</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">])</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+                        <span style="color: #f8f8f2">}</span>
+
+                        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">m;</span>
+                        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(m</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year;</span> <span style="color: #f8f8f2">m</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{}</span>
+
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"=== Storm Info ==="</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Event ID:       "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index].event_id</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Event Type:     "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index].event_type</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Fatality count: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">fatalityData[fatalitySize</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+                        <span style="color: #f8f8f2">fatality_event</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">fat</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index].f;</span>
+
+                        <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(fat</span> <span style="color: #f92672">==</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"No fatalities"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"=== Fatalities ==="</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                        <span style="color: #f8f8f2">}</span>
+
+                        <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(fat</span> <span style="color: #f92672">!=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Fatality ID: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">fatality_id</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Type:        "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">fatality_type</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Date:        "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">fatality_date</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Age:         "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">fatality_age</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Sex:         "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">fatality_sex</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Location:    "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">fatality_location</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                            <span style="color: #f8f8f2">fat</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">fat</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+                        <span style="color: #f8f8f2">}</span>
+                    <span style="color: #f8f8f2">}</span>
+
+
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Max Heap Node Count: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">countMaxHeap(fatalityData,stormSize,</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Max Heap Height: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">countMaxHeapHeight(fatalityData,stormSize,</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+                <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #75715e">//Find Max command</span>
+                    <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">damagetype;</span> <span style="color: #75715e">//true for property, false for crops</span>
+
+                    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">datasize;</span>
+
+                    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">m;</span>
+
+                    <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(arguments[</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">"all"</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">datasize</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormSize;</span>
+                    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(m</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">stoi(arguments[</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">])</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year;</span> <span style="color: #f8f8f2">m</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{}</span>
+                        <span style="color: #f8f8f2">datasize</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormCount[m];</span>
+                    <span style="color: #f8f8f2">}</span>
+
+                    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">stormData[datasize][</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">];</span>
+
+                    <span style="color: #66d9ef">for</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">&lt;</span><span style="color: #f8f8f2">datasize;stormData[i][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,stormData[i][</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">);</span>
+
+                    <span style="color: #75715e">//Assign damage type value</span>
+                    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(arguments[</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">"damage_property"</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">damagetype</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">true;</span>
+                    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">damagetype</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">false;</span>
+                    <span style="color: #f8f8f2">}</span>
+
+                    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+                    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(arguments[</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">"all"</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormcount;</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormCount[j];</span> <span style="color: #f8f8f2">l</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                                <span style="color: #f8f8f2">stormData[index][</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormArray[j]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[l].event_id;</span>
+
+                                <span style="color: #75715e">//Property Damage</span>
+                                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(damagetype)</span> <span style="color: #f8f8f2">{</span>
+                                    <span style="color: #f8f8f2">stormData[index][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormArray[j]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[l].damage_property;</span>
+                                <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                                    <span style="color: #f8f8f2">stormData[index][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormArray[j]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[l].damage_crops;</span>
+                                <span style="color: #f8f8f2">}</span>
+                                <span style="color: #f8f8f2">index</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+                            <span style="color: #f8f8f2">}</span>
+                        <span style="color: #f8f8f2">}</span>
+                    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+
+
+                        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormCount[m];</span> <span style="color: #f8f8f2">l</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">stormData[l][</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[l].event_id;</span>
+
+                            <span style="color: #75715e">//Property Damage</span>
+                            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(damagetype)</span> <span style="color: #f8f8f2">{</span>
+                                <span style="color: #f8f8f2">stormData[l][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[l].damage_property;</span>
+                            <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                                <span style="color: #f8f8f2">stormData[l][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[l].damage_crops;</span>
+                            <span style="color: #f8f8f2">}</span>
+
+                        <span style="color: #f8f8f2">}</span>
+                    <span style="color: #f8f8f2">}</span>
+
+                    <span style="color: #f8f8f2">heapSort(stormData,</span> <span style="color: #f8f8f2">datasize);</span>
+
+                    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stoi(arguments[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]);</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">hash_table_entry</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">hashTable[hashEventID(stormData[datasize</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">])];</span>
+
+                        <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_id</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">stormData[datasize</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">j][</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">])</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+                        <span style="color: #f8f8f2">}</span>
+
+                        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">m;</span>
+                        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(m</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year;</span> <span style="color: #f8f8f2">m</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{}</span>
+
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span><span style="color: #e6db74">"ID: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index].event_id</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" "</span><span style="color: #f8f8f2">;</span>
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"/ Type: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index].event_type</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" "</span><span style="color: #f8f8f2">;</span>
+
+                        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(damagetype)</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"/ Property Damage: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index].damage_property;</span>
+                        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"/ Crop Damage: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">event_index].damage_crops;</span>
+                        <span style="color: #f8f8f2">}</span>
+                        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">}</span>
+
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Max Heap Node Count: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">countMaxHeap(stormData,datasize,</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Max Heap Root Height: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">countMaxHeapHeight(stormData,datasize,</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Max Heap Left Height: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">countMaxHeap(stormData,datasize,</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Max Heap Right Height: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">countMaxHeapHeight(stormData,datasize,</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+                <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #f8f8f2">}</span><span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #75715e">//Range command</span>
+
+            <span style="color: #75715e">//Boolean value for differentiating between sorting by month or year</span>
+            <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">state;</span>
+
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(arguments[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">"state"</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">state</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">true;</span>
+            <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">state</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">false;</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #75715e">//Variable for deciding the size of the storm array to be cnostructed</span>
+            <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">bstcount;</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(arguments[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">"all"</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">bstcount</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormSize;</span>
+            <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">m;</span>
+                <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(m</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">stoi(arguments[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">])</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year;</span> <span style="color: #f8f8f2">m</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{}</span>
+
+                <span style="color: #f8f8f2">bstcount</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">stormCount[m];</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #75715e">//Declare new array of storm events. This will be used to heapify and then to create the BST</span>
+            <span style="color: #f8f8f2">storm_event</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">stormData[bstcount];</span>
+
+
+            <span style="color: #75715e">//Fill the stormdata array with the appriopriate storms</span>
+            <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(arguments[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">"all"</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormcount;</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormCount[j];</span> <span style="color: #f8f8f2">l</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">stormData[index</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f92672">&amp;</span><span style="color: #f8f8f2">stormArray[j]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[l];</span>
+                    <span style="color: #f8f8f2">}</span>
+                <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+
+                <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">m;</span>
+                <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(m</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">stoi(arguments[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">])</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">year;</span> <span style="color: #f8f8f2">m</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{}</span>
+
+                <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormCount[m];</span> <span style="color: #f8f8f2">l</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">stormData[index</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f92672">&amp;</span><span style="color: #f8f8f2">stormArray[m]</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">events[l];</span>
+                <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #75715e">//Heapify the stormData array to sort it</span>
+            <span style="color: #f8f8f2">heapify(stormData,</span> <span style="color: #f8f8f2">bstcount,</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">state);</span>
+
+            <span style="color: #75715e">//Build binary search tree from sorted stormData Array</span>
+            <span style="color: #f8f8f2">bst</span><span style="color: #f92672">*</span> <span style="color: #f8f8f2">root</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">buildBST(stormData,</span> <span style="color: #f8f8f2">root,</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">bstcount,</span> <span style="color: #f8f8f2">state);</span>
+
+            <span style="color: #75715e">//Use recursive function to travel and print the values of the BST</span>
+            <span style="color: #f8f8f2">inOrderTraversal(root,</span> <span style="color: #f8f8f2">arguments[</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">arguments[</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">hashTable,</span> <span style="color: #f8f8f2">stormArray,</span> <span style="color: #f8f8f2">state);</span>
+
+            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Node Count: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">countBST(root)</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Root Height: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">findBSTHeight(root)</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Left Height: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">findBSTHeight(root</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">left)</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Right Height: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">findBSTHeight(root</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">right)</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+            <span style="color: #f8f8f2">clearTree(root);</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">//Final Summary</span>
+
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"========== Summary =========="</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+    <span style="color: #75715e">//Variable to store the count of chain lengths. Index corresponds to length. Max length is the storm size in the case all events get placed into the same chain</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">chainlength</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #66d9ef">int</span><span style="color: #f8f8f2">[stormSize];</span>
+
+    <span style="color: #75715e">//Initialize chainlength array to 0</span>
+    <span style="color: #66d9ef">for</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;chainlength[i]</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormSize;i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{}</span>
+
+    <span style="color: #66d9ef">for</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">length</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">hashTableSize;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">,length</span><span style="color: #f92672">=</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">hash_table_entry</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">hashTable[i];</span>
+        <span style="color: #66d9ef">while</span><span style="color: #f8f8f2">(ptr</span> <span style="color: #f92672">!=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+            <span style="color: #f8f8f2">length</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #75715e">//Increase count of index at length by one to count the chain at that length</span>
+        <span style="color: #f8f8f2">chainlength[length]</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Chain Length (N)        Number of chains with Length N"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+    <span style="color: #66d9ef">for</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">stormSize,chainlength[i]</span> <span style="color: #f92672">&gt;</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"                       "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">chainlength[i]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">loadFactor</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">float</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">stormSize</span><span style="color: #f92672">/</span><span style="color: #f8f8f2">hashTableSize;</span>
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Load factor: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">loadFactor</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">""</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+<span style="color: #f8f8f2">}</span>
+</pre></div>

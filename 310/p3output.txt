@@ -1,0 +1,110 @@
+=== Storm Info ===
+Event ID:          9977772
+Year:              1980
+Month:             May
+Event Type:        Thunderstorm Wind
+CZ Type:           C
+CZ Name:           JEFFERSON
+Injuries Direct:   0
+Injuries Indirect: 0
+Deaths Direct:     0
+Deaths Indirect:   0
+Damage Property:   0
+Damage Crops:      0
+Tor F Scale:       
+Deaths Direct:     0
+No fatalities
+
+ID: 10046120 / Type: Hail / Crop Damage: 0
+ID: 10127699 / Type: Thunderstorm Wind / Crop Damage: 0
+ID: 9978900 / Type: Thunderstorm Wind / Crop Damage: 0
+ID: 10031038 / Type: Hail / Crop Damage: 0
+ID: 10031037 / Type: Hail / Crop Damage: 0
+
+Max Heap Node Count: 6135
+Max Heap Root Height: 13
+Max Heap Left Height: 4087
+Max Heap Right Height: 11
+
+
+=== Storm Info ===
+Event ID:       10129998
+Event Type:     Tornado
+Fatality count: 1
+
+=== Fatalities ===
+Fatality ID: 1006044
+Type:        D
+Date:        2/10/1981 3:25
+Age:         4
+Sex:          
+Location:    S,1981,June,Tornado,C,COLLI
+
+=== Storm Info ===
+Event ID:       10105532
+Event Type:     Tornado
+Fatality count: 1
+
+=== Fatalities ===
+Fatality ID: 1006050
+Type:        D
+Date:        4/30/1981 20:15
+Age:         4
+Sex:          
+Location:    
+
+=== Storm Info ===
+Event ID:       10091076
+Event Type:     Tornado
+Fatality count: 1
+
+=== Fatalities ===
+Fatality ID: 1006043
+Type:        D
+Date:        2/11/1981 2:30
+Age:         4
+Sex:          
+Location:    Wind
+
+=== Storm Info ===
+Event ID:       10053798
+Event Type:     Tornado
+Fatality count: 1
+
+=== Fatalities ===
+Fatality ID: 1006053
+Type:        D
+Date:        6/14/1981 15:00
+Age:         4
+Sex:          
+Location:    
+
+=== Storm Info ===
+Event ID:       10023778
+Event Type:     Tornado
+Fatality count: 1
+
+=== Fatalities ===
+Fatality ID: 1006055
+Type:        D
+Date:        6/19/1981 18:30
+Age:         4
+Sex:          
+Location:    
+
+Max Heap Node Count: 17778
+Max Heap Height: 15
+
+Node Count: 17779
+Root Height: 15
+Left Height: 14
+Right Height: 13
+
+
+========== Summary ==========
+Chain Length (N)        Number of chains with Length N
+0                       20527
+1                       12410
+2                       2527
+3                       105
+Load factor: 0.499845

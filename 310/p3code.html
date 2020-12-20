@@ -1,0 +1,541 @@
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;iostream&gt;</span>
+
+<span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;fstream&gt;</span>
+
+<span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;string&gt;</span>
+
+<span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;cmath&gt;</span>
+
+<span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;vector&gt;</span>
+
+<span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;limits&gt;</span>
+
+<span style="color: #75715e">#include</span> <span style="color: #75715e">&lt;thread&gt;</span>
+
+
+<span style="color: #66d9ef">using</span> <span style="color: #66d9ef">namespace</span> <span style="color: #f8f8f2">std;</span>
+
+<span style="color: #75715e">//Defining Int MAX</span>
+<span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">INT_MAX</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">std</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">numeric_limits</span> <span style="color: #f92672">&lt;</span> <span style="color: #66d9ef">int</span> <span style="color: #f92672">&gt;</span> <span style="color: #f92672">::</span><span style="color: #f8f8f2">max();</span>
+
+<span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">filepath</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">"CS310_project_subregion/"</span><span style="color: #f8f8f2">;</span>
+
+<span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">graphList</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">adjCoordinates;</span>
+    <span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">graphList</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">next;</span>
+    <span style="color: #f8f8f2">graphList()</span><span style="color: #f92672">:</span> <span style="color: #f8f8f2">adjCoordinates(</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">),</span> <span style="color: #f8f8f2">next(</span><span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{}</span>
+<span style="color: #f8f8f2">};</span>
+
+<span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">A</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">weight[</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">];</span>
+<span style="color: #f8f8f2">};</span>
+
+
+<span style="color: #75715e">// Returns degree of ver in given graph</span>
+<span style="color: #66d9ef">int</span> <span style="color: #a6e22e">findDegree</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">graphList</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">G)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">degree</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">graphList</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">graphPtr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">G;</span>
+    <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(graphPtr</span> <span style="color: #f92672">!=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">degree</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">graphPtr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">graphPtr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">degree;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">float</span> <span style="color: #a6e22e">clusteringCoefficient</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index,</span> <span style="color: #f8f8f2">graphList</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">adj[</span><span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">])</span> <span style="color: #f8f8f2">{</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">count</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">degree</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">findDegree(adj[index]);</span>
+    <span style="color: #f8f8f2">vector</span> <span style="color: #f92672">&lt;</span> <span style="color: #66d9ef">int</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">neighborIndex(degree);</span>
+    <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">visited[degree][degree];</span>
+
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">degree;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">degree;</span> <span style="color: #f8f8f2">l</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">visited[i][l]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">false;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">graphList</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">adj[index];</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">NULL;</span> <span style="color: #f8f8f2">l</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">neighborIndex[l]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">adjCoordinates;</span>
+        <span style="color: #f8f8f2">count</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">neighborCount</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+    <span style="color: #75715e">//node must at least degree of 2 to get clustering coeffecient</span>
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #f92672">!</span><span style="color: #f8f8f2">neighborIndex.empty()</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">degree</span> <span style="color: #f92672">&gt;</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">degree;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">graphList</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">ptr1</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">adj[neighborIndex[i]];</span>
+            <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(ptr1</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">NULL)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">degree;</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(neighborIndex[j]</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">ptr1</span> <span style="color: #f92672">-&gt;</span> <span style="color: #f8f8f2">adjCoordinates</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">ptr1</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">adjCoordinates</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">index</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">visited[i][j]</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">false)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #f8f8f2">neighborCount</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+                        <span style="color: #f8f8f2">visited[i][j]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">true;</span>
+                        <span style="color: #f8f8f2">visited[j][i]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">true;</span>
+
+                        <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+                    <span style="color: #f8f8f2">}</span>
+                <span style="color: #f8f8f2">}</span>
+                <span style="color: #f8f8f2">ptr1</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr1</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next;</span>
+            <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">float</span><span style="color: #f8f8f2">)(</span><span style="color: #ae81ff">2</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">neighborCount)</span> <span style="color: #f92672">/</span> <span style="color: #f8f8f2">(degree</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">(degree</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">));</span>
+    <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #a6e22e">DFSUtil</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index,</span> <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">visited[],</span> <span style="color: #f8f8f2">graphList</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">adj[])</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #75715e">// Mark the current node as visited and print it</span>
+    <span style="color: #f8f8f2">visited[index]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">true;</span>
+
+    <span style="color: #75715e">// Recur for all the vertices</span>
+    <span style="color: #75715e">// adjacent to this vertex</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">count</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+
+    <span style="color: #f8f8f2">graphList</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">adj[index];</span>
+
+    <span style="color: #66d9ef">while</span> <span style="color: #f8f8f2">(ptr</span> <span style="color: #f92672">!=</span> <span style="color: #66d9ef">nullptr</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #f92672">!</span><span style="color: #f8f8f2">visited[ptr</span> <span style="color: #f92672">-&gt;</span> <span style="color: #f8f8f2">adjCoordinates])</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">count</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">DFSUtil(ptr</span> <span style="color: #f92672">-&gt;</span> <span style="color: #f8f8f2">adjCoordinates,</span> <span style="color: #f8f8f2">visited,</span> <span style="color: #f8f8f2">adj);</span>
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">ptr</span> <span style="color: #f92672">-&gt;</span> <span style="color: #f8f8f2">next;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">count;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #75715e">// Connected Components function finds</span>
+<span style="color: #f8f8f2">std</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">vector</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">A</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">connectedComponents(graphList</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">adj[</span><span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">])</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #f8f8f2">vector</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">A</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">componentSize;</span>
+
+    <span style="color: #66d9ef">bool</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">visited</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #66d9ef">bool</span><span style="color: #f8f8f2">[</span><span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">];</span> <span style="color: #75715e">// Fixed size known at compile time</span>
+
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">v</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">v</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">v</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">visited[v]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">false;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">v</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">v</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">v</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #f92672">!</span><span style="color: #f8f8f2">visited[v])</span> <span style="color: #f8f8f2">{</span>
+
+            <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">size</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">DFSUtil(v,</span> <span style="color: #f8f8f2">visited,</span> <span style="color: #f8f8f2">adj);</span>
+
+            <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">found</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">false;</span>
+
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">componentSize.size();</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(componentSize[i].weight[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">size)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">found</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">true;</span>
+                    <span style="color: #f8f8f2">componentSize[i].weight[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+                    <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #f92672">!</span><span style="color: #f8f8f2">found)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">A</span> <span style="color: #f8f8f2">sizeInfo</span> <span style="color: #f92672">=</span> <span style="color: #f92672">*</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">A;</span>
+                <span style="color: #f8f8f2">sizeInfo.weight[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">size;</span>
+                <span style="color: #f8f8f2">sizeInfo.weight[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(componentSize.size()</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">componentSize.push_back(sizeInfo);</span>
+                <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">componentSize.size();</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(size</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">componentSize[i].weight[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">])</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">componentSize.insert(componentSize.begin()</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">i,</span> <span style="color: #f8f8f2">sizeInfo);</span>
+                            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+                        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(i</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">(componentSize.size()</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">))</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">componentSize.push_back(sizeInfo);</span>
+                            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+                        <span style="color: #f8f8f2">}</span>
+                    <span style="color: #f8f8f2">}</span>
+                <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">componentSize;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #75715e">//function for calculating Sxx and Syy</span>
+<span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">calculateSD(</span><span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">data[],</span> <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">mean)</span> <span style="color: #f8f8f2">{</span>
+    <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">standardDeviation</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0.0</span><span style="color: #f8f8f2">;</span>
+
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">832</span><span style="color: #f8f8f2">;</span> <span style="color: #f92672">++</span><span style="color: #f8f8f2">i)</span>
+        <span style="color: #f8f8f2">standardDeviation</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">pow(data[i]</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">mean,</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">);</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">standardDeviation;</span>
+<span style="color: #f8f8f2">}</span>
+
+<span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">main()</span> <span style="color: #f8f8f2">{</span>
+
+    <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">iceMeasurements[</span><span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">832</span><span style="color: #f8f8f2">];</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">yearLowerBound</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">1990</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">yearUpperBound</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">2005</span><span style="color: #f8f8f2">;</span>
+
+    <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">weekString;</span>
+    <span style="color: #75715e">//i represents year, j represents week</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">index</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">temp;</span>
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">counter</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+    <span style="color: #75715e">//Load all data into icemeasurements array skipping land cells</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;=</span> <span style="color: #f8f8f2">yearUpperBound</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">yearLowerBound;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">year</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">to_string(yearLowerBound</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">i);</span>
+
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">53</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">index</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(j</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">10</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">weekString</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">"0"</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">to_string(j);</span>
+            <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">weekString</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">to_string(j);</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">path</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">filepath</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">year</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">"/Beaufort_Sea_diffw"</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">weekString</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">"y"</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">year</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">"+landmask"</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">ifstream</span> <span style="color: #a6e22e">file</span><span style="color: #f8f8f2">(path,</span> <span style="color: #f8f8f2">ios</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">binary);</span>
+
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #f92672">!</span><span style="color: #f8f8f2">file)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3969</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">file.read((</span><span style="color: #66d9ef">char</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">)</span> <span style="color: #f92672">&amp;</span> <span style="color: #f8f8f2">temp,</span> <span style="color: #66d9ef">sizeof</span><span style="color: #f8f8f2">(</span><span style="color: #66d9ef">float</span><span style="color: #f8f8f2">));</span>
+
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(temp</span> <span style="color: #f92672">!=</span> <span style="color: #ae81ff">168</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">temp</span> <span style="color: #f92672">!=</span> <span style="color: #ae81ff">157</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">iceMeasurements[index][counter]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">temp;</span>
+                    <span style="color: #f8f8f2">index</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">counter</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">line;</span>
+
+    <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">xMean[</span><span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">];</span>
+    <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">xSd[</span><span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">];</span>
+
+    <span style="color: #75715e">//Calculate mean for each node</span>
+    <span style="color: #f8f8f2">index</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">count</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">z</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">z</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">832</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">z</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">xMean[j]</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">iceMeasurements[j][z];</span>
+            <span style="color: #f8f8f2">count</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #f8f8f2">xMean[j]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">xMean[j]</span> <span style="color: #f92672">/</span> <span style="color: #f8f8f2">count;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">//Declare adjacency list and adjacency matrix</span>
+    <span style="color: #66d9ef">static</span> <span style="color: #f8f8f2">graphList</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">adj[</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">];</span>
+
+    <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">adjMatrix[</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">];</span>
+    <span style="color: #66d9ef">static</span> <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">rMatrix[</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">];</span>
+
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">p</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">p</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">p</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(i</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">l)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">rMatrix[p][i][l]</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+                    <span style="color: #f8f8f2">adjMatrix[p][i][l]</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">rMatrix[p][i][l]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">INT_MAX;</span>
+                    <span style="color: #f8f8f2">adjMatrix[p][i][l]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">INT_MAX;</span>
+                <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">//Initialize adjaency list to null</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">p</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">p</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">p</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">adj[p][i]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">NULL;</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">//Pearson values array</span>
+    <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">pearsonValues[</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #ae81ff">.95</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #ae81ff">.925</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #ae81ff">.9</span>
+    <span style="color: #f8f8f2">};</span>
+
+    <span style="color: #75715e">//Array for keeping track of whether xSd arrays have already been calculated</span>
+    <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">xSdVisited[</span><span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">];</span>
+
+    <span style="color: #75715e">//Initialize array</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">g</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">g</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">g</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #f8f8f2">xSdVisited[g]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">false;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">//Loop through each pair and calculate pearson and graph edges</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+
+        <span style="color: #f8f8f2">xSd[j]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">calculateSD(iceMeasurements[j],</span> <span style="color: #f8f8f2">xMean[j]);</span>
+        <span style="color: #f8f8f2">xSdVisited[j]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">true;</span>
+
+        <span style="color: #75715e">//Sxy calculation</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">sxy</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">z</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">z</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">832</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">z</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">sxy</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">(iceMeasurements[j][z]</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">xMean[j])</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">(iceMeasurements[l][z]</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">xMean[l]);</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #f92672">!</span><span style="color: #f8f8f2">xSdVisited[l])</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">xSdVisited[l]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">true;</span>
+                <span style="color: #f8f8f2">xSd[l]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">calculateSD(iceMeasurements[l],</span> <span style="color: #f8f8f2">xMean[l]);</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">pearsonCC;</span>
+            <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">denom</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">xSd[j]</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">xSd[l];</span>
+
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(denom</span> <span style="color: #f92672">!=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+
+                <span style="color: #75715e">//Calculate pearson CC for the pair</span>
+                <span style="color: #f8f8f2">pearsonCC</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">fabs((sxy</span> <span style="color: #f92672">/</span> <span style="color: #f8f8f2">sqrtf(denom)));</span>
+
+                <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">h</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">h</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">h</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(pearsonCC</span> <span style="color: #f92672">&gt;=</span> <span style="color: #f8f8f2">pearsonValues[h])</span> <span style="color: #f8f8f2">{</span>
+
+                        <span style="color: #f8f8f2">adjMatrix[h][l][j]</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+                        <span style="color: #f8f8f2">adjMatrix[h][j][l]</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+
+                        <span style="color: #75715e">//Insert edges into both vertices</span>
+                        <span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">graphList</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">newItem</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">graphList();</span>
+                        <span style="color: #f8f8f2">newItem</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">adj[h][j];</span>
+                        <span style="color: #f8f8f2">newItem</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">adjCoordinates</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">l;</span>
+                        <span style="color: #f8f8f2">adj[h][j]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">newItem;</span>
+
+                        <span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">graphList</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">newItem1</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">graphList();</span>
+                        <span style="color: #f8f8f2">newItem1</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">next</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">adj[h][l];</span>
+                        <span style="color: #f8f8f2">newItem1</span><span style="color: #f92672">-&gt;</span><span style="color: #f8f8f2">adjCoordinates</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">j;</span>
+                        <span style="color: #f8f8f2">adj[h][l]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">newItem1;</span>
+                    <span style="color: #f8f8f2">}</span>
+                <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Connected Components"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">p</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">p</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">p</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #75715e">//Find all connected components using connected Components function</span>
+        <span style="color: #f8f8f2">std</span><span style="color: #f92672">::</span><span style="color: #f8f8f2">vector</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">A</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">connectedcount</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">connectedComponents(adj[p]);</span>
+
+
+        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">pearsonValues[p]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"|  # | Degree"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">total</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">connectedcount.size();</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+
+            <span style="color: #75715e">//Find amount of digits in number for formatting reasnos</span>
+            <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">firstCol</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">log10(connectedcount[j].weight[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">])</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+
+            <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">space</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">""</span><span style="color: #f8f8f2">;</span>
+
+            <span style="color: #75715e">//Fancy formatting stuff</span>
+            <span style="color: #66d9ef">if</span><span style="color: #f8f8f2">(firstCol</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">space</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">" "</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">space</span> <span style="color: #f92672">=</span> <span style="color: #e6db74">"  "</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"| "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">connectedcount[j].weight[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">space</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"| "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">connectedcount[j].weight[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+            <span style="color: #f8f8f2">total</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">connectedcount[j].weight[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">];</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" Total: "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">total</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">degreeCount;</span>
+    <span style="color: #f8f8f2">vector</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">A</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">degreeDistribution;</span>
+
+    <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">meanDegreeDistribution[</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #ae81ff">0</span>
+    <span style="color: #f8f8f2">};</span>
+
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">p</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">p</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">p</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">r</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">r</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">r</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #f8f8f2">degreeCount</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">findDegree(adj[p][r]);</span>
+            <span style="color: #f8f8f2">meanDegreeDistribution[p]</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">degreeCount;</span>
+
+            <span style="color: #66d9ef">bool</span> <span style="color: #f8f8f2">found</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">false;</span>
+
+            <span style="color: #75715e">//This below code is for finding the right place to insert the degree distribution count into</span>
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">degreeDistribution.size();</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(degreeDistribution[i].weight[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">degreeCount)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">found</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">true;</span>
+                    <span style="color: #f8f8f2">degreeDistribution[i].weight[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+                    <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+                <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(</span><span style="color: #f92672">!</span><span style="color: #f8f8f2">found)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">struct</span> <span style="color: #a6e22e">A</span> <span style="color: #f8f8f2">sizeInfo</span> <span style="color: #f92672">=</span> <span style="color: #f92672">*</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">A;</span>
+                <span style="color: #f8f8f2">sizeInfo.weight[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">degreeCount;</span>
+                <span style="color: #f8f8f2">sizeInfo.weight[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span>
+
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(degreeDistribution.size()</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">degreeDistribution.push_back(sizeInfo);</span>
+                <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">degreeDistribution.size();</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(degreeCount</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">degreeDistribution[i].weight[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">])</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">degreeDistribution.insert(degreeDistribution.begin()</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">i,</span> <span style="color: #f8f8f2">sizeInfo);</span>
+                            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+                        <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(i</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">(degreeDistribution.size()</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">))</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">degreeDistribution.push_back(sizeInfo);</span>
+                            <span style="color: #66d9ef">break</span><span style="color: #f8f8f2">;</span>
+                        <span style="color: #f8f8f2">}</span>
+                    <span style="color: #f8f8f2">}</span>
+                <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">max</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">min</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">degreeDistribution[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">].weight[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">];</span>
+
+        <span style="color: #75715e">//Find max and min values for histagram creation</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">degreeDistribution.size();</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(degreeDistribution[j].weight[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">max)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">max</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">degreeDistribution[j].weight[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">];</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(degreeDistribution[j].weight[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">min)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">min</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">degreeDistribution[j].weight[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">];</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #f8f8f2">index</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Degree Distribution "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">pearsonValues[p]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">min;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;=</span> <span style="color: #f8f8f2">max;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">count</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(degreeDistribution[degreeDistribution.size()</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">index</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">].weight[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">i)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">count</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">degreeDistribution[degreeDistribution.size()</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">index</span> <span style="color: #f92672">-</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">].weight[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">];</span>
+                <span style="color: #f8f8f2">index</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+            <span style="color: #f8f8f2">}</span>
+
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(i</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">10</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"| "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"   | "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">count</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+            <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(i</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">100</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"| "</span><span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"  | "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">count</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+            <span style="color: #f8f8f2">}</span> <span style="color: #66d9ef">else</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"| "</span><span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" | "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">count</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+            <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+        <span style="color: #f8f8f2">meanDegreeDistribution[p]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">meanDegreeDistribution[p]</span> <span style="color: #f92672">/</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">//Compare clustering coeffecient and characteristic path length using Floyd Warshall</span>
+    <span style="color: #75715e">//Loop through only second half of array since it is symmetric</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">p</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">p</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">p</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">k</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">k</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f92672">++</span><span style="color: #f8f8f2">k)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f92672">++</span><span style="color: #f8f8f2">i)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f92672">++</span><span style="color: #f8f8f2">j)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(adjMatrix[p][i][k]</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">INT_MAX</span> <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">adjMatrix[p][k][j]</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">INT_MAX)</span> <span style="color: #f8f8f2">{</span>
+                        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(adjMatrix[p][i][j]</span> <span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">adjMatrix[p][i][k]</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">adjMatrix[p][k][j])</span> <span style="color: #f8f8f2">{</span>
+                            <span style="color: #f8f8f2">adjMatrix[p][j][i]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">adjMatrix[p][i][k]</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">adjMatrix[p][k][j];</span>
+                            <span style="color: #f8f8f2">adjMatrix[p][i][j]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">adjMatrix[p][i][k]</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">adjMatrix[p][k][j];</span>
+                        <span style="color: #f8f8f2">}</span>
+                    <span style="color: #f8f8f2">}</span>
+                <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #75715e">//Formatting for each pearson value to get columns alligned</span>
+    <span style="color: #f8f8f2">string</span> <span style="color: #f8f8f2">Formatting[</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #e6db74">" "</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">""</span><span style="color: #f8f8f2">,</span>
+            <span style="color: #e6db74">"  "</span>
+    <span style="color: #f8f8f2">};</span>
+
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Charactaristic Path Length Averages:"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"-------------------"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">p</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">p</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">p</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">count</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">meanShortestPath</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(adjMatrix[p][i][j]</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">INT_MAX)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">count</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+                    <span style="color: #f8f8f2">meanShortestPath</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">adjMatrix[p][i][j];</span>
+                <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"| "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">pearsonValues[p]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">Formatting[p]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" | "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">float</span><span style="color: #f8f8f2">)(meanShortestPath</span> <span style="color: #f92672">/</span> <span style="color: #f8f8f2">count)</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" |"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"-------------------"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Charactaristic Path Length Averages Random:"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"-------------------"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">p</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">p</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">p</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+
+        <span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">count</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">meanShortestPath</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">+</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">j</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(adjMatrix[p][i][j]</span> <span style="color: #f92672">!=</span> <span style="color: #f8f8f2">INT_MAX)</span> <span style="color: #f8f8f2">{</span>
+                    <span style="color: #f8f8f2">count</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">;</span>
+                    <span style="color: #f8f8f2">meanShortestPath</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">adjMatrix[p][i][j];</span>
+                <span style="color: #f8f8f2">}</span>
+            <span style="color: #f8f8f2">}</span>
+        <span style="color: #f8f8f2">}</span>
+
+        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"| "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">pearsonValues[p]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">Formatting[p]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" | "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">float</span><span style="color: #f8f8f2">)(log(</span><span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">)</span> <span style="color: #f92672">/</span> <span style="color: #f8f8f2">log(meanDegreeDistribution[p]))</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" |"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+    <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"-------------------"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+    <span style="color: #75715e">//Clustering coefficient</span>
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Mean Clustering Coefficient"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"--------------------"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+    <span style="color: #75715e">//Calculate clustering coefficient by looping through each index and dividing by 3186</span>
+    <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span>
+        <span style="color: #66d9ef">float</span> <span style="color: #f8f8f2">mean</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3186</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">i</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span>
+            <span style="color: #f8f8f2">mean</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">clusteringCoefficient(i,</span> <span style="color: #f8f8f2">adj[l]);</span>
+        <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"| "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">pearsonValues[l]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">Formatting[l]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" | "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">mean</span> <span style="color: #f92672">/</span> <span style="color: #ae81ff">3186</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" |"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+    <span style="color: #f8f8f2">}</span>
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"--------------------"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"Mean Clustering Coefficient Random"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"----------------------"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">(</span><span style="color: #66d9ef">int</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span> <span style="color: #f92672">&lt;</span> <span style="color: #ae81ff">3</span><span style="color: #f8f8f2">;</span> <span style="color: #f8f8f2">l</span><span style="color: #f92672">++</span><span style="color: #f8f8f2">)</span> <span style="color: #f8f8f2">{</span> <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"| "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">pearsonValues[l]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">Formatting[l]</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" | "</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">meanDegreeDistribution[l]</span> <span style="color: #f92672">/</span> <span style="color: #ae81ff">3186</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">" |"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span> <span style="color: #f8f8f2">}</span>
+
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #e6db74">"----------------------"</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+    <span style="color: #f8f8f2">cout</span> <span style="color: #f92672">&lt;&lt;</span> <span style="color: #f8f8f2">endl;</span>
+
+    <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+<span style="color: #f8f8f2">}</span>
+</pre></div>
