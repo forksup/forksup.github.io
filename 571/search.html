@@ -1,0 +1,88 @@
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><span style="color: #75715e"># Recursive DFS Solution</span>
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">DFS</span><span style="color: #f8f8f2">(problem,</span> <span style="color: #f8f8f2">item):</span>
+    <span style="color: #75715e"># Search the deepest nodes in the search tree first</span>
+
+    <span style="color: #f8f8f2">paths</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">Stack()</span>
+
+    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isGoalState(item[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">][</span><span style="color: #f92672">-</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]):</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">item[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span>
+
+    <span style="color: #f8f8f2">[paths</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push([item[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span><span style="color: #f92672">+</span><span style="color: #f8f8f2">[state[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]],</span> <span style="color: #f8f8f2">item[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span><span style="color: #f92672">+</span><span style="color: #f8f8f2">[state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]]])</span> \
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">state</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getSuccessors(item[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">][</span><span style="color: #f92672">-</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">])</span> <span style="color: #66d9ef">if</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">item[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]]</span>
+
+    <span style="color: #66d9ef">while</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">paths</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isEmpty():</span>
+        <span style="color: #f8f8f2">directions</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">DFS(problem,</span> <span style="color: #f8f8f2">paths</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop())</span>
+
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">directions:</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">directions</span>
+
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">breadthFirstSearch</span><span style="color: #f8f8f2">(problem):</span>
+    <span style="color: #75715e"># Search the shallowest nodes in the search tree first.</span>
+
+    <span style="color: #f8f8f2">visited</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getStartState()]</span>
+    <span style="color: #f8f8f2">parentPath</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">Stack()</span>
+    <span style="color: #f8f8f2">parentPath</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push([[],</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getStartState()])</span>
+
+    <span style="color: #66d9ef">while</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">parentPath</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isEmpty():</span>
+        <span style="color: #f8f8f2">paths</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">parentPath</span>
+        <span style="color: #f8f8f2">parentPath</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">Stack()</span>
+
+        <span style="color: #66d9ef">while</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">paths</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isEmpty():</span>
+
+            <span style="color: #f8f8f2">item</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">paths</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop()</span>
+
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isGoalState(item[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]):</span>
+                <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">item[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span>
+
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">state</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getSuccessors(item[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]):</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">visited:</span>
+                    <span style="color: #f8f8f2">visited</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">])</span>
+
+                    <span style="color: #f8f8f2">parentPath</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push([item[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span><span style="color: #f92672">+</span><span style="color: #f8f8f2">[state[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]],state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]])</span>
+
+<span style="color: #66d9ef">def</span> <span style="color: #a6e22e">ASTAR</span><span style="color: #f8f8f2">(problem,</span> <span style="color: #f8f8f2">start,</span> <span style="color: #f8f8f2">heuristic):</span>
+    <span style="color: #75715e"># Use PriorityQueue to easily find lowest cost path</span>
+
+    <span style="color: #f8f8f2">frontier</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">PriorityQueue()</span>
+    <span style="color: #f8f8f2">visited</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[]</span>
+
+    <span style="color: #f8f8f2">paths</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{generateIndex(start):</span> <span style="color: #f8f8f2">[]}</span>
+
+    <span style="color: #f8f8f2">frontier</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push(start,</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">)</span>
+    <span style="color: #66d9ef">while</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">frontier</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isEmpty():</span>
+
+        <span style="color: #f8f8f2">node</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">frontier</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">pop()</span>
+        <span style="color: #f8f8f2">path</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">paths[generateIndex(node)]</span>
+
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">isGoalState(node):</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">path</span>
+
+        <span style="color: #f8f8f2">visited</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(node)</span>
+
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">state</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getSuccessors(node):</span>
+
+            <span style="color: #75715e"># Append move to path history</span>
+            <span style="color: #f8f8f2">newPath</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">path</span><span style="color: #f92672">+</span><span style="color: #f8f8f2">[state[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]]</span>
+            <span style="color: #f8f8f2">membership</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">False</span>
+
+            <span style="color: #75715e"># Check if item exists in heap</span>
+            <span style="color: #f8f8f2">i</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span>
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">range(len(frontier</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">heap)):</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">frontier</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">heap[i][</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]:</span>
+                    <span style="color: #f8f8f2">membership</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">True</span>
+                    <span style="color: #66d9ef">break</span>
+
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">not</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">visited</span> <span style="color: #f92672">and</span> <span style="color: #f92672">not</span> <span style="color: #f8f8f2">membership:</span>
+                <span style="color: #75715e"># Finally push to the PriorityQueue</span>
+                <span style="color: #f8f8f2">frontier</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">push(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getCostOfActions(newPath)</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">heuristic(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">problem))</span>
+                <span style="color: #f8f8f2">paths[generateIndex(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">])]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">newPath</span>
+
+            <span style="color: #66d9ef">elif</span> <span style="color: #f8f8f2">membership:</span>
+                <span style="color: #75715e"># If lower cost path is found update the path inside frontier</span>
+                <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">(problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getCostOfActions(newPath)</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">heuristic(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">problem))</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">frontier</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">heap[i][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]:</span>
+                    <span style="color: #f8f8f2">frontier</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">update(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">problem</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getCostOfActions(newPath)</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">heuristic(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">problem))</span>
+                    <span style="color: #f8f8f2">paths[generateIndex(state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">])]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">newPath</span>
+
+    <span style="color: #75715e"># No possible path to goal</span>
+    <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">[]</span>
+</pre></div>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<!--[if lt IE 8 ]><html class="no-js ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="no-js ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 8)|!(IE)]><!--><html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+
+   <!--- Basic Page Needs
+   ================================================== -->
+   <meta charset="utf-8">
+	<title>mitchell.rocks - Pacman Search</title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+   <!-- Mobile Specific Metas
+   ================================================== -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<!-- CSS
+    ================================================== -->
+   <link rel="stylesheet" href="css/default.css">
+	<link rel="stylesheet" href="css/layout.css">
+   <link rel="stylesheet" href="css/media-queries.css">
+   <link rel="stylesheet" href="css/magnific-popup.css">
+
+   <!-- Script
+   ================================================== -->
+   <script src="js/modernizr.js"></script>
+
+   <!-- Favicons
+	================================================== -->
+	<link rel="shortcut icon" href="favicon.ico" >
+
+</head>
+
+<body>
+
+   <!-- Header
+   ================================================== -->
+      <nav id="nav-wrap" class="opaque">
+
+         <a class="mobile-btn" href="#nav-wrap" title="Show navigation">Show navigation</a>
+         <a class="mobile-btn" href="#" title="Hide navigation">Hide navigation</a>
+
+         <ul id="nav" class="nav">
+            <li><a class="smoothscroll" href="index.html">Home</a></li>
+            <li class="current"><a class="smoothscroll" href="#top" id="inactiveLink">Pacman Project</a></li>
+         </ul> <!-- end #nav -->
+
+      </nav> <!-- end #nav-wrap -->
+
+
+   <section id="top" style="padding: 90px 0 72px; background: #fff;">
+
+      <div class="row add-bottom">
+
+         <div class="twelve columns">
+
+            <h1>CSE 571 Pacman Project</h1>
+
+            <p class="lead add-bottom">The "Pacman Project" is a popular Artificial Intelligence project created by UC Berkley. This is a python based pacman enviornment which makes it easy to create scripts controlling Pacman in a variety of different situations and problems. This consists of three total projects with several different goals.
+            </p>
+
+            <h3>Project 1: Goal Search</h3>
+            <p>
+            In Project 1, we are tasked with creating state space search algorithms for finding specific food dots as a goals. We implemented a variety of classic graph search algorithms including: 
+            <ul class="disc">
+               <li>Breadth-first search (BFS)</li>
+               <li>Depth-first search (DFS)</li>
+               <li>Uniform Cost Search (UCS)</li>
+               <li>A* Search</li>
+            </ul>
+
+            A full description of this project can be found <a href="571/PJ1.pdf">here</a>.
+            </p>
+
+
+         </div>
+
+      </div> <!-- Row End-->
+
+      <div class="row add-bottom">
+
+         <div class="six columns add-bottom">
+
+            <figure>
+               <img src="images/bfs.gif" alt="Trulli" style="width:100%" class="center">
+               <figcaption class="center">Breadth-first Search on BigMaze</figcaption>
+            </figure>
+
+
+         </div>
+
+         <div class="six columns add-bottom">
+
+            <figure>
+               <img src="images/dfs.gif" alt="Trulli" style="width:100%" class="center">
+               <figcaption class="center">Depth-first search  on BigMaze</figcaption>
+            </figure>
+
+         </div>
+
+      </div>
+
+      <div class="row add-bottom">
+         <h3>The Code</h3>
+
+         <div class="twelve columns add-bottom">
+               <embed src="571/search.html" type="application/pdf" width="100%" height="1000px">
+               <a href="https://github.com/forksup/CSE-571-Pacman-Search-Problem" class="box big">Find the full code on <img src="images/github.png" width="75px"></a>
+
+         </div>
+
+
+      </div>
+
+
+      <div class="row add-bottom">
+
+         <div class="12 columns add-bottom centered-thing">
+
+             <h3>Corners Problem</h3>
+            <p>
+               By encoding the statespace differently, A* can be applied to more complex problems. Instead of the state space just containing the position of the pacman, it also contains the corners that need to be visited. Below is the demonstration of this implementation:
+            </p>
+
+            <img src="images/cornersProblem.gif" style="width:100%" class="center">
+            <figcaption class="center">Corners problem using A* Search</figcaption>
+
+         </div>
+
+         <hr />
+
+      </div> <!-- Row End-->
+
+
+      <div class="row add-bottom">
+
+         <div class="12 columns add-bottom">
+
+            <h3>Project 4: Reinforcement Learning</h3>
+            <p>
+            In Project 4, we are tasked with utilizing several different reinforcement learning techniques including:<ul class="disc">
+               <li>Value Iteration</li>
+               <li>Q-Learning</li>
+               <li>Approximate Q-learning </li>
+            </ul>
+
+            A full description of this project can be found <a href="571/PJ4.pdf">here</a>.<br><br></p>
+
+            <h3>Q-Learning</h3>
+
+            <p>
+            Below is an implementation of Q-Learning. This is an online learning method which requires pacman to "practice" and learn on its own. Each of these practice runs are referred to as an Epoch. The more epochs the better. To train the below agent 50 of these epochs were performed before execution. It is not perfect and in some cases looses the game however it works great in some cases.<br>
+            </p>
+
+            <img src="images/learning.gif" style="width:100%" class="center">
+            <figcaption class="center">Q-Learning After 50 Epochs</figcaption>
+
+         </div>
+
+      </div> <!-- Row End-->
+
+      <div class="row add-bottom">
+         <h3>The Code</h3>
+
+         <div class="twelve columns add-bottom">
+               <embed src="571/reinforcement.html" type="application/pdf" width="100%" height="1000px">
+               <a href="https://github.com/forksup/CSE-571-Pacman-Reinforcement-Learning" class="box big">Find full code on <img src="images/github.png" width="75px"></a>
+
+         </div>
+
+
+      </div>
+
+
+   <!-- footer
+   ================================================== -->
+   <footer>
+
+      <div class="row">
+
+         <div class="twelve columns">
+
+            <ul class="social-links">
+               
+               <li><a href="https://www.linkedin.com/in/mitchell-bucklew-3b9315138/"><i class="fa fa-linkedin"></i></a></li>
+               <li><a href="https://www.youtube.com/channel/UCt4hxBaveiN_wAD2Fyb4uvA"><i class="fa fa-youtube"></i></a></li>
+               <li><a href="https://github.com/forksup"><i class="fa fa-github"></i></a></li>
+
+            </ul>
+
+            <ul class="copyright">
+               <li>&copy; Copyright 2014 CeeVee</li>
+               <li>Design by <a href="http://www.styleshout.com/" title="Styleshout" target="_blank">Styleshout</a></li>   
+            </ul>
+
+         </div>
+
+
+      </div>
+
+   </footer> <!-- Footer End-->
+
+   <!-- Java Script
+   ================================================== -->
+   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+   <script>window.jQuery || document.write('<script src="js/jquery-1.10.2.min.js"><\/script>')</script>
+   <script type="text/javascript" src="js/jquery-migrate-1.2.1.min.js"></script>
+
+   <script src="js/jquery.flexslider.js"></script>
+   <script src="js/waypoints.js"></script>
+   <script src="js/jquery.fittext.js"></script>
+   <script src="js/magnific-popup.js"></script>
+   <script src="js/doubletaptogo.js"></script>
+   <script src="js/spin.js"></script>
+
+
+</body>
+
+</html>

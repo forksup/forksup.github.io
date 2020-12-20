@@ -28,6 +28,11 @@ body { background: #0f0f0f !important; }
 /* b. Header Styles
 /* ------------------------------------------------------------------ */
 
+.box {
+   display: flex;
+   align-items:center;
+}
+
 header {
    position: relative;
    height: 800px;

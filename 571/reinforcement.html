@@ -1,0 +1,214 @@
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><span style="color: #66d9ef">class</span> <span style="color: #a6e22e">ValueIterationAgent</span><span style="color: #f8f8f2">(ValueEstimationAgent):</span>
+    <span style="color: #e6db74">"""</span>
+<span style="color: #e6db74">        * Please read learningAgents.py before reading this.*</span>
+
+<span style="color: #e6db74">        A ValueIterationAgent takes a Markov decision process</span>
+<span style="color: #e6db74">        (see mdp.py) on initialization and runs value iteration</span>
+<span style="color: #e6db74">        for a given number of iterations using the supplied</span>
+<span style="color: #e6db74">        discount factor.</span>
+<span style="color: #e6db74">    """</span>
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__init__</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">mdp,</span> <span style="color: #f8f8f2">discount</span><span style="color: #f92672">=</span><span style="color: #ae81ff">0.9</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">iterations</span><span style="color: #f92672">=</span><span style="color: #ae81ff">100</span><span style="color: #f8f8f2">):</span>
+        <span style="color: #e6db74">"""</span>
+<span style="color: #e6db74">          Your value iteration agent should take an mdp on</span>
+<span style="color: #e6db74">          construction, run the indicated number of iterations</span>
+<span style="color: #e6db74">          and then act according to the resulting policy.</span>
+
+<span style="color: #e6db74">          Some useful mdp methods you will use:</span>
+<span style="color: #e6db74">              mdp.getStates()</span>
+<span style="color: #e6db74">              mdp.getPossibleActions(state)</span>
+<span style="color: #e6db74">              mdp.getTransitionStatesAndProbs(state, action)</span>
+<span style="color: #e6db74">              mdp.getReward(state, action, nextState)</span>
+<span style="color: #e6db74">              mdp.isTerminal(state)</span>
+<span style="color: #e6db74">        """</span>
+        <span style="color: #f8f8f2">ValueEstimationAgent</span><span style="color: #f92672">.</span><span style="color: #a6e22e">__init__</span><span style="color: #f8f8f2">(self)</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">mdp</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">discount</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">discount</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">iterations</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">iterations</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">values</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">util</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">Counter()</span> <span style="color: #75715e"># A Counter is a dict with default 0</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">actions</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[</span><span style="color: #e6db74">'north'</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">'south'</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">'west'</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">'east'</span><span style="color: #f8f8f2">]</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">actionRes</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">'north'</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">1</span><span style="color: #f8f8f2">],</span> <span style="color: #e6db74">'south'</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> <span style="color: #f92672">-</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">],</span> <span style="color: #e6db74">'west'</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">[</span><span style="color: #f92672">-</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #e6db74">'east'</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]}</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">relatedActions</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">{</span><span style="color: #e6db74">'north'</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">[</span><span style="color: #e6db74">'west'</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">'east'</span><span style="color: #f8f8f2">],</span> <span style="color: #e6db74">'south'</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">[</span><span style="color: #e6db74">'west'</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">'east'</span><span style="color: #f8f8f2">],</span>
+                               <span style="color: #e6db74">'west'</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">[</span><span style="color: #e6db74">'north'</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">'south'</span><span style="color: #f8f8f2">],</span> <span style="color: #e6db74">'east'</span><span style="color: #f8f8f2">:</span> <span style="color: #f8f8f2">[</span><span style="color: #e6db74">'north'</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">'south'</span><span style="color: #f8f8f2">]}</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">runValueIteration()</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">runValueIteration</span><span style="color: #f8f8f2">(self):</span>
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">range(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">iterations):</span>
+            <span style="color: #f8f8f2">oValues</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">copy</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">deepcopy(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">values)</span>
+            <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">x</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">range(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">grid</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">width):</span>
+                <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">y</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">range(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">grid</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">height):</span>
+                    <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">isinstance(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">grid[x][y],</span> <span style="color: #f8f8f2">str):</span>
+                        <span style="color: #f8f8f2">oValues[(x,</span> <span style="color: #f8f8f2">y)]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">livingReward</span> \
+                                <span style="color: #f92672">+</span> <span style="color: #f8f8f2">(max([self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">computeQValueFromValues([x,</span> <span style="color: #f8f8f2">y],</span> <span style="color: #f8f8f2">a)</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">a</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">actions]))</span>
+                    <span style="color: #66d9ef">elif</span> <span style="color: #f8f8f2">isinstance(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">grid[x][y],</span> <span style="color: #f8f8f2">int):</span>
+                        <span style="color: #f8f8f2">oValues[(x,</span> <span style="color: #f8f8f2">y)]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">grid[x][y]</span>
+            <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">values</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">oValues</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">getValue</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">state):</span>
+        <span style="color: #e6db74">"""</span>
+<span style="color: #e6db74">          Return the value of the state (computed in __init__).</span>
+<span style="color: #e6db74">        """</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">values[state]</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">computeQValueFromValues</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">state,</span> <span style="color: #f8f8f2">action):</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">action</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">'exit'</span><span style="color: #f8f8f2">:</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">grid[state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]][state[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]]</span>
+
+        <span style="color: #f8f8f2">nextStates</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[[x</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">y</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">x,</span> <span style="color: #f8f8f2">y</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">zip(state,</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">actionRes[action])],</span>
+                      <span style="color: #f8f8f2">[x</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">y</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">x,</span> <span style="color: #f8f8f2">y</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">zip(state,</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">actionRes[self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">relatedActions[action][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]])],</span>
+                      <span style="color: #f8f8f2">[x</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">y</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">x,</span> <span style="color: #f8f8f2">y</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">zip(state,</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">actionRes[self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">relatedActions[action][</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]])]]</span>
+
+        <span style="color: #f8f8f2">result</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[]</span>
+
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">nState</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">nextStates:</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #ae81ff">0</span> <span style="color: #f92672">&lt;=</span> <span style="color: #f8f8f2">nState[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">grid</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">width</span> <span style="color: #f92672">and</span> <span style="color: #ae81ff">0</span> <span style="color: #f92672">&lt;=</span> <span style="color: #f8f8f2">nState[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">grid</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">height</span> \
+                    <span style="color: #f92672">and</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">grid[nState[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]][nState[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]]</span> <span style="color: #f92672">!=</span> <span style="color: #e6db74">'#'</span><span style="color: #f8f8f2">:</span>
+                <span style="color: #f8f8f2">result</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(nState)</span>
+            <span style="color: #66d9ef">else</span><span style="color: #f8f8f2">:</span>
+                <span style="color: #f8f8f2">result</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(state)</span>
+
+        <span style="color: #f8f8f2">total</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">(</span><span style="color: #ae81ff">1</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">noise)</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">values[(result[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">result[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">])]</span>
+
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">noise</span> <span style="color: #f92672">&gt;</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">:</span>
+            <span style="color: #f8f8f2">total</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">noise</span><span style="color: #f92672">/</span><span style="color: #ae81ff">2</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">values[(result[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">result[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">])]</span>
+            <span style="color: #f8f8f2">total</span> <span style="color: #f92672">+=</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">noise</span><span style="color: #f92672">/</span><span style="color: #ae81ff">2</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">values[(result[</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">],</span> <span style="color: #f8f8f2">result[</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">][</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">])]</span>
+
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">discount</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">total</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">computeActionFromValues</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">state):</span>
+        <span style="color: #e6db74">"""</span>
+<span style="color: #e6db74">          The policy is the best action in the given state</span>
+<span style="color: #e6db74">          according to the values currently stored in self.values.</span>
+
+<span style="color: #e6db74">          You may break ties any way you see fit.  Note that if</span>
+<span style="color: #e6db74">          there are no legal actions, which is the case at the</span>
+<span style="color: #e6db74">          terminal state, you should return None.</span>
+<span style="color: #e6db74">        """</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">state</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">grid</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">terminalState:</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #e6db74">'None'</span>
+        <span style="color: #66d9ef">elif</span> <span style="color: #f8f8f2">isinstance(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">grid</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">data[state[</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]][state[</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]],</span> <span style="color: #f8f8f2">int):</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #e6db74">'exit'</span>
+
+        <span style="color: #f8f8f2">nextStates</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[[sum(i)</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">zip(state,</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">actionRes[a])]</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">a</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">actions]</span>
+
+        <span style="color: #f8f8f2">scores</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[]</span>
+        <span style="color: #f8f8f2">actions</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[]</span>
+
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">i</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">range(len(nextStates)):</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #ae81ff">0</span> <span style="color: #f92672">&lt;=</span> <span style="color: #f8f8f2">nextStates[i][</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">grid</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">width</span> <span style="color: #f92672">and</span> <span style="color: #ae81ff">0</span> <span style="color: #f92672">&lt;=</span> <span style="color: #f8f8f2">nextStates[i][</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">]</span> <span style="color: #f92672">&lt;</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">mdp</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">grid</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">height:</span>
+                <span style="color: #f8f8f2">scores</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">computeQValueFromValues(state,</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">actions[i]))</span>
+                <span style="color: #f8f8f2">actions</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">actions[i])</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">actions[scores</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">index(max(scores))]</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">getPolicy</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">state):</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">computeActionFromValues(state)</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">getAction</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">state):</span>
+        <span style="color: #e6db74">"Returns the policy at the state (no exploration)."</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">computeActionFromValues(state)</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">getQValue</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">state,</span> <span style="color: #f8f8f2">action):</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">computeQValueFromValues(state,</span> <span style="color: #f8f8f2">action)</span>
+
+<span style="color: #66d9ef">class</span> <span style="color: #a6e22e">QLearningAgent</span><span style="color: #f8f8f2">(ReinforcementAgent):</span>
+    <span style="color: #e6db74">"""</span>
+<span style="color: #e6db74">      Q-Learning Agent</span>
+
+<span style="color: #e6db74">      Functions you should fill in:</span>
+<span style="color: #e6db74">        - computeValueFromQValues</span>
+<span style="color: #e6db74">        - computeActionFromQValues</span>
+<span style="color: #e6db74">        - getQValue</span>
+<span style="color: #e6db74">        - getAction</span>
+<span style="color: #e6db74">        - update</span>
+
+<span style="color: #e6db74">      Instance variables you have access to</span>
+<span style="color: #e6db74">        - self.epsilon (exploration prob)</span>
+<span style="color: #e6db74">        - self.alpha (learning rate)</span>
+<span style="color: #e6db74">        - self.discount (discount rate)</span>
+
+<span style="color: #e6db74">      Functions you should use</span>
+<span style="color: #e6db74">        - self.getLegalActions(state)</span>
+<span style="color: #e6db74">          which returns legal actions for a state</span>
+<span style="color: #e6db74">    """</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">__init__</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f92672">**</span><span style="color: #f8f8f2">args):</span>
+        <span style="color: #e6db74">"You can initialize Q-values here..."</span>
+        <span style="color: #f8f8f2">ReinforcementAgent</span><span style="color: #f92672">.</span><span style="color: #a6e22e">__init__</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f92672">**</span><span style="color: #f8f8f2">args)</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">qValues</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">util</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">Counter()</span>  <span style="color: #75715e"># A Counter is a dict with default 0</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">gamma</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">args[</span><span style="color: #e6db74">'gamma'</span><span style="color: #f8f8f2">]</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">actions</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[</span><span style="color: #e6db74">'north'</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">'south'</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">'west'</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">'east'</span><span style="color: #f8f8f2">,</span> <span style="color: #e6db74">'exit'</span><span style="color: #f8f8f2">]</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">N</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">util</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">Counter()</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">K</span> <span style="color: #f92672">=</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">;</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">getQValue</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">state,</span> <span style="color: #f8f8f2">action):</span>
+        <span style="color: #e6db74">"""</span>
+<span style="color: #e6db74">          Returns Q(state,action)</span>
+<span style="color: #e6db74">          Should return 0.0 if we have never seen a state</span>
+<span style="color: #e6db74">          or the Q node value otherwise</span>
+<span style="color: #e6db74">        """</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">state</span> <span style="color: #f92672">==</span> <span style="color: #e6db74">'TERMINAL_STATE'</span><span style="color: #f8f8f2">:</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">0.00</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">qValues[(state,</span> <span style="color: #f8f8f2">action)]</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">computeValueFromQValues</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">state):</span>
+        <span style="color: #e6db74">"""</span>
+<span style="color: #e6db74">          Returns max_action Q(state,action)</span>
+<span style="color: #e6db74">          where the max is over legal actions.  Note that if</span>
+<span style="color: #e6db74">          there are no legal actions, which is the case at the</span>
+<span style="color: #e6db74">          terminal state, you should return a value of 0.0.</span>
+<span style="color: #e6db74">        """</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #ae81ff">0.00</span> <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">len(self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getLegalActions(state))</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">0</span> <span style="color: #66d9ef">else</span>\
+            <span style="color: #f8f8f2">max([self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getQValue(state,</span> <span style="color: #f8f8f2">a)</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">a</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getLegalActions(state)])</span>
+
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">computeActionFromQValues</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">state):</span>
+        <span style="color: #e6db74">"""</span>
+<span style="color: #e6db74">          Compute the best action to take in a state.  Note that if there</span>
+<span style="color: #e6db74">          are no legal actions, which is the case at the terminal state,</span>
+<span style="color: #e6db74">          you should return None.</span>
+<span style="color: #e6db74">        """</span>
+        <span style="color: #f8f8f2">legalActions</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getLegalActions(state)</span>
+
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">len(legalActions)</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">:</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #66d9ef">None</span>
+
+        <span style="color: #f8f8f2">getScores</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getQValue(state,action)</span> <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">action</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">legalActions]</span>
+        <span style="color: #f8f8f2">index</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">[]</span>
+
+        <span style="color: #66d9ef">for</span> <span style="color: #f8f8f2">s</span> <span style="color: #f92672">in</span> <span style="color: #f8f8f2">getScores:</span>
+            <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">s</span> <span style="color: #f92672">==</span> <span style="color: #f8f8f2">max(getScores):</span>
+                <span style="color: #f8f8f2">index</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">append(getScores</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">index(s))</span>
+
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">legalActions[random</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">choice(index)]</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">getAction</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">state):</span>
+        <span style="color: #e6db74">"""</span>
+<span style="color: #e6db74">          Compute the action to take in the current state.  With</span>
+<span style="color: #e6db74">          probability self.epsilon, we should take a random action and</span>
+<span style="color: #e6db74">          take the best policy action otherwise.  Note that if there are</span>
+<span style="color: #e6db74">          no legal actions, which is the case at the terminal state, you</span>
+<span style="color: #e6db74">          should choose None as the action.</span>
+
+<span style="color: #e6db74">          HINT: You might want to use util.flipCoin(prob)</span>
+<span style="color: #e6db74">          HINT: To pick randomly from a list, use random.choice(list)</span>
+<span style="color: #e6db74">        """</span>
+        <span style="color: #75715e"># Pick Action</span>
+        <span style="color: #f8f8f2">legalActions</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getLegalActions(state)</span>
+
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">len(legalActions)</span> <span style="color: #f92672">==</span> <span style="color: #ae81ff">0</span><span style="color: #f8f8f2">:</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #66d9ef">None</span>
+        <span style="color: #66d9ef">if</span> <span style="color: #f8f8f2">util</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">flipCoin(</span><span style="color: #ae81ff">1</span><span style="color: #f92672">-</span><span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">epsilon):</span>
+            <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">computeActionFromQValues(state)</span>
+        <span style="color: #66d9ef">return</span> <span style="color: #f8f8f2">random</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">choice(legalActions)</span>
+
+    <span style="color: #66d9ef">def</span> <span style="color: #a6e22e">update</span><span style="color: #f8f8f2">(self,</span> <span style="color: #f8f8f2">state,</span> <span style="color: #f8f8f2">action,</span> <span style="color: #f8f8f2">nextState,</span> <span style="color: #f8f8f2">reward):</span>
+        <span style="color: #e6db74">"""</span>
+<span style="color: #e6db74">          The parent class calls this to observe a</span>
+<span style="color: #e6db74">          state = action =&gt; nextState and reward transition.</span>
+<span style="color: #e6db74">          You should do your Q-Value update here</span>
+
+<span style="color: #e6db74">          NOTE: You should never call this function,</span>
+<span style="color: #e6db74">          it will be called on your behalf</span>
+<span style="color: #e6db74">        """</span>
+        <span style="color: #f8f8f2">sample</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">reward</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">discount</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getValue(nextState)</span>
+        <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">qValues[(state,</span> <span style="color: #f8f8f2">action)]</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">((</span><span style="color: #ae81ff">1</span> <span style="color: #f92672">-</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">alpha)</span> <span style="color: #f92672">*</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">getQValue(state,</span> <span style="color: #f8f8f2">action))</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">self</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">alpha</span><span style="color: #f92672">*</span><span style="color: #f8f8f2">sample</span>
+</pre></div>
