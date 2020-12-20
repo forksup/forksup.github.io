@@ -66,13 +66,13 @@
 
             <h1>NASA PSYCHE Capstone Project</h1>
 
-            <p class="lead add-bottom">For my senior year I am collaborating with a team of 4 to complete research as part of the <a href="https://www.jpl.nasa.gov/missions/psyche/">NASA PSYCHE mission</a>. We are exploring Machine Learning and Data Science techniques for fitting a complex 3D surface. Our client (NASA) is interested in potential solutions to minimize error. 
+            <p class="lead add-bottom">For my senior year, I am collaborating with a team of 4 to complete a research project as part of the <a href="https://www.jpl.nasa.gov/missions/psyche/">NASA PSYCHE mission</a>. We are exploring Machine Learning and Data Science techniques for fitting a complex 3D surface. Our client (NASA) is interested in potential solutions to minimize error. 
             </p>
 
             <h3>About the PSYCHE Mission</h3>
             <p class=>
             <img class="pull-left" alt="sample-image" src="images/psyche.jpg" width="120" height="120">
-            The Psyche mission is a journey to a unique metal asteroid orbiting the Sun between Mars and Jupiter. What makes the asteroid Psyche unique is that it appears to be the exposed nickel-iron core of an early planet, one of the building blocks of our solar system. Deep within rocky, terrestrial planets - including Earth - scientists infer the presence of metallic cores, but these lie cunreachably far below the planets' rocky mantles and crusts. Because we cannot see or measure Earth's core directly, Psyche offers a unique window into the violent history of collisions  that created terrestrial planets.  
+            The Psyche mission is a journey to a unique metal asteroid orbiting the Sun between Mars and Jupiter. What makes the asteroid Psyche unique is that it appears to be the exposed nickel-iron core of an early planet, one of the building blocks of our solar system. Deep within rocky, terrestrial planets - including Earth - scientists infer the presence of metallic cores, but these lie unreachably far below the planets' rocky mantles and crusts. Because we cannot see or measure Earth's core directly, Psyche offers a unique window into the violent history of collisions that created terrestrial planets. 
             </p>
 
             <hr>
@@ -101,7 +101,7 @@
 
             <h3>About the Ion Thruster</h3>
 
-            <p class="drop-cap">A Hall-effect thruster is an electric form of rocket propulsion which emits ions from an electric field. Although this produces a low thrust, over time it compounds into a significant force. In space there is little to no forms of kinectic friction so objects move indefiently at their speed until they are stopped by some other force. This engine is ideal in missions with distant objectives, as the thruster is very effecient and requires little propelent. In traditional forms of rocket boosters, the propelent and O2 reserves make up a considerable amount of the craft's mass. The higher the force of a booster, the lower the effeciency. So this booster has a low force, and high effeciency.
+            <p class="drop-cap">Key features of the probe measurements are not captured by fit functions used for the interpolation, which causes increased uncertainty in the key plume shape parameters. Certain sections of the plume are easier to fit as they resemble simple normal distributions. However, towards the end of the plume, some curves contain this signature dip as shown in the chart. As shown in the image, standard statistical fitting techniques are insufficient for fitting this dip. The goal of our research is to find machine learning techniques for fitting this curve. 0 
             </p>
 
          </div>
@@ -147,7 +147,7 @@
 
          <iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="file1.html" height="800em" width="100%"></iframe>
 
-         <p class="big center">Above is a surface triangulation of one of the given data sets. This is useful for conceptually understanding the shape of the plume. The "top" of the plume is the most challenging area to fit due to it's unique shape. There are also several divets on either side of the plume.
+         <p class="big center">Above is a surface triangulation of one of the given data sets. This is useful for conceptually understanding the shape of the plume. The "top" of the plume is the most challenging area to fit due to its unique shape. There are also several divets on either side of the plume.
          </p>
          </div>
    </div>
@@ -159,31 +159,32 @@
 
          <iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="file2.html" height="800em" width="100%"></iframe>
 
-         <p class="big center">Shown above is the data provided. Unlike the figure above, the surface is not triangulated. As you can see the shape is not very dense in terms of data. the limited data makes utilizing Machine Learning techniques challenging
+         <p class="big center">Shown above is the data provided. Unlike the figure above, the surface is not triangulated. As you can see the shape is not very dense in terms of data. the limited data makes utilizing Machine Learning techniques challenging.
          </p>
 
             
 
       <div class="row add-bottom">
 
-         <div class="twelve columns">
+         <div class="twelve columns center">
             <h3>Technologies Used</h3>
+
+            <div id="banner">
+               <div class="inline-block">
+                  <img src ="images/python.svg">
+               </div>
+
+               <div class="inline-block">
+                  <img src ="images/juptyer.png">
+               </div>
+
+               <div class="inline-block">
+                  <img src ="images/tensorflow.png">
+               </div>
+            </div>
          </div>
       </div>
 
-      <div id="banner">
-          <div class="inline-block">
-              <img src ="images/python.svg">
-          </div>
-
-          <div class="inline-block">
-              <img src ="images/juptyer.png">
-          </div>
-
-          <div class="inline-block">
-              <img src ="images/tensorflow.png">
-          </div>
-      </div>
 
 
       <hr>
@@ -194,11 +195,9 @@
 
             <h3>Our Approach</h3>
             <p class="big">
-               We have been exploring many machine learning techniques and strategies for fitting this data. We have had success using <b>Keras</b> with <b>tensorflow</b>. <br><br>
+               We have been exploring many machine learning techniques and strategies for fitting this data. We have had success using <b>Keras</b> with <b>TensorFlow</b>. <br><br>
 
-               We have begun by modulating the problem into easier to solve problems. We plotted individual collectors and attempted to use deep learning techniques for fitting the individual lines. 
-
-               Below are some of the fits we have created. On the left is the original data and on the right is the machine learning line fit:
+               We have begun by modulating the problem into easier to solve problems. We plotted individual collectors and attempted to use deep learning techniques for fitting individual lines. Below are some of the fits we have created. On the left is the original data and on the right is the machine learning line fit: 
             </p>
 
             <p>
