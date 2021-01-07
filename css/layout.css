@@ -334,29 +334,29 @@ ul#nav li.current a { color: #F06000; }
 }
 
 .python {
-  	width: 90%;
+  	width: 70%;
   	-moz-animation: python 2s ease;
   	-webkit-animation: python 2s ease;
 }
 .c {
-  	width: 80%;
+  	width: 60%;
   	-moz-animation: c 2s ease;
   	-webkit-animation: c 2s ease;
 }
-.wordpress {
+.java {
   	width: 50%;
-  	-moz-animation: wordpress 2s ease;
-  	-webkit-animation: wordpress 2s ease;
+  	-moz-animation: java 2s ease;
+  	-webkit-animation: java 2s ease;
 }
-.css {
-  	width: 90%;
-  	-moz-animation: css 2s ease;
-  	-webkit-animation: css 2s ease;
+.data {
+  	width: 70%;
+  	-moz-animation: data 2s ease;
+  	-webkit-animation: data 2s ease;
 }
-.html5 {
-  	width: 60%;
-  	-moz-animation: html5 2s ease;
-  	-webkit-animation: html5 2s ease;
+.sql {
+  	width: 40%;
+  	-moz-animation: sql 2s ease;
+  	-webkit-animation: sql 2s ease;
 }
 .jquery {
   	width: 50%;
@@ -366,23 +366,23 @@ ul#nav li.current a { color: #F06000; }
 
 @-moz-keyframes python {
   0%   { width: 0px;  }
-  100% { width: 90%;  }
+  100% { width: 70%;  }
 }
 @-moz-keyframes c {
   0%   { width: 0px;  }
-  100% { width: 80%;  }
+  100% { width: 60%;  }
 }
-@-moz-keyframes wordpress {
+@-moz-keyframes java {
   0%   { width: 0px;  }
   100% { width: 50%;  }
 }
-@-moz-keyframes css {
+@-moz-keyframes data {
   0%   { width: 0px;  }
-  100% { width: 90%;  }
+  100% { width: 70%;  }
 }
-@-moz-keyframes html5 {
+@-moz-keyframes sql {
   0%   { width: 0px;  }
-  100% { width: 60%;  }
+  100% { width: 40%;  }
 }
 @-moz-keyframes jquery {
   0%   { width: 0px;  }
@@ -391,23 +391,23 @@ ul#nav li.current a { color: #F06000; }
 
 @-webkit-keyframes python {
   0%   { width: 0px;  }
-  100% { width: 90%;  }
-}
-@-webkit-keyframes illustrator {
-  0%   { width: 0px;  }
   100% { width: 70%;  }
 }
-@-webkit-keyframes wordpress {
+@-webkit-keyframes c {
+  0%   { width: 0px;  }
+  100% { width: 60%;  }
+}
+@-webkit-keyframes java {
   0%   { width: 0px;  }
   100% { width: 50%;  }
 }
-@-webkit-keyframes css {
+@-webkit-keyframes data {
   0%   { width: 0px;  }
-  100% { width: 90%;  }
+  100% { width: 70%;  }
 }
-@-webkit-keyframes html5 {
+@-webkit-keyframes sql {
   0%   { width: 0px;  }
-  100% { width: 60%;  }
+  100% { width: 40%;  }
 }
 @-webkit-keyframes jquery {
   0%   { width: 0px;  }
