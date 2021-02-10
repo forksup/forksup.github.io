@@ -87,7 +87,7 @@
          <div class="six columns add-bottom">
 
             <figure>
-               <img src="images/hall.jpg" alt="Trulli" style="width:100%" class="center">
+               <img src="images/hall.jpg" alt="Trulli" style="width:75%;"  class="center">
                <figcaption class="center">Hall Effect Ion Thruster</figcaption>
             </figure>
 
@@ -118,7 +118,6 @@
             <h3>The Problem Posed</h3>
             <p>
                During operation, Hall thrusters exhaust a hemispherical cloud of plasma known as a plume.<br><br>
-
                Knowing the shape of the plume is important for two reasons:
 
                <ol>
@@ -127,8 +126,8 @@
                </ol>
             </p>
             <p>
-            <img class="pull-left" alt="sample-image" src="images/Capture.PNG" width="480" height="480">
-            Key features of the probe measurements are not captured by fit functions used for the interpolation, which causes increased uncertainty in the key plume shape parameters. Certain sections of the plume are easier to fit as they resemble simple normal distributions. However, towards the end of the plume there are curves which contain this signature dip as shown in the chart. As shown in the image, standard statistical fitting techniques are insuffecient for fitting this dip. The goal of our research is to find machine learning techniques for fitting this curve.
+            <img class="pull-left" alt="sample-image" src="images/Capture.PNG" width="40%" height="40%">
+            Key features of the probe measurements are not captured by fit functions used for the interpolation, which causes increased uncertainty in the key plume shape parameters. Certain sections of the plume are easier to fit as they resemble simple normal distributions. However, towards the end of the plume there are curves which contain this signature dip as shown in the chart. As shown in the image, standard statistical fitting techniques are insuffecient for fitting this dip. The goal of our research is to find machine learning techniques for fitting this curve. As well as create a data science application which will help NASA engineers visualize experimental data. 
             </p>
             </p>
 
@@ -150,9 +149,9 @@
             <img src="images/webapp1.png">  
 
             <p class="center">
-               Above is the application we have developed for data analysis and computation of the thruster plume. 
+               Above is a screenshot of the application we have developed for data analysis and computation of the thruster plume. 
                The application comes in two variations. A pure Javascript implementation and a Javascript and Python implementation with Python as the backend. Please be aware this application is still in the early days of development.
-               This 3d graph is compeltely interactable thanks to the amazing <a href="https://plotly.com/">plotly</a> library. There are two dropdowns which represent the graph type and graph color scheme respectively. The graph type includes contour plots, line plots, and surface triangulations. There is also a x and y range slider, allowing the user to change the x and y bounds. 
+               This 3d graph is compeltely interactable thanks to the amazing <a href="https://plotly.com/">plotly</a> library. There are two dropdowns which represent the type to be generated and graph color scheme respectively. The graph type can be either a contour plot, line plot, surface triangulation, or scatter plot which is generated dynamically from the inputtd dataset. There is also a x and y range slider, allowing the user to change the x and y bounds. 
             </p>
          </div>
    </div>
