@@ -102,7 +102,7 @@
             <h3>About the Ion Thruster</h3>
 
             <p class="drop-cap">
-               Ion thruster's are a unique featurisitc technology which will enable human's to travel further and further distances from the earth. This mainly eletric thruster harnesses solar power to ionize gas and provide thrust. Although the thrust generated is minimal, the thruster can be engaged for months at a time. So in the zero gravity of deep space there is no opposiing forces to thrust like earth's gravity or air friction so over time it can become substantial. 3
+               Ion thruster's are a unique featurisitc technology which will enable human's to travel further and further distances from the earth. This mainly eletric thruster harnesses solar power to ionize gas and provide thrust. Although the thrust generated is minimal, the thruster can be engaged for months at a time. So in the zero gravity of deep space there is no opposiing forces to thrust like earth's gravity or air friction so over time it can become substantial.
             </p>
 
          </div>
@@ -116,19 +116,19 @@
          <div class="twelve columns">
 
             <h3>The Problem Posed</h3>
-            <p class="big">
+            <p>
                During operation, Hall thrusters exhaust a hemispherical cloud of plasma known as a plume.<br><br>
 
                Knowing the shape of the plume is important for two reasons:
 
-               <ol class="big">
+               <ol>
                   <li>Ensures other spacecraft surfaces are not damaged by ion impingement</li>
                   <li>Provides information on how efficiently the thruster is working</li>
                </ol>
             </p>
-            <p class="big">
+            <p>
             <img class="pull-left" alt="sample-image" src="images/Capture.PNG" width="480" height="480">
-            Key features of the probe measurements are not captured by fit functions used for the interpolation, which causes increased uncertainty in the key plume shape parameters. Certain sections of the plume are easier to fit as they resemble simple normal distributions. However, towards the end of the plume there are curves which contain this signature dip as shown in the chart. As shown in the image, standard statistical fitting techniques are insuffecient for fitting this dip. The goal of our research is to find machine learning techniques for fitting this curve. 0
+            Key features of the probe measurements are not captured by fit functions used for the interpolation, which causes increased uncertainty in the key plume shape parameters. Certain sections of the plume are easier to fit as they resemble simple normal distributions. However, towards the end of the plume there are curves which contain this signature dip as shown in the chart. As shown in the image, standard statistical fitting techniques are insuffecient for fitting this dip. The goal of our research is to find machine learning techniques for fitting this curve.
             </p>
             </p>
 
@@ -145,11 +145,13 @@
 
          <div class="twelve columns">
 
+            <img src="images/webapp1.png">  
 
-         <iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="file1.html" height="800em" width="100%"></iframe>
-
-         <p class="big center">Above is a surface triangulation of one of the given data sets. This is useful for conceptually understanding the shape of the plume. The "top" of the plume is the most challenging area to fit due to its unique shape. There are also several divets on either side of the plume.
-         </p>
+            <p class="center">
+               Above is the application we have developed for data analysis and computation of the thruster plume. 
+               The application comes in two variations. A pure Javascript implementation and a Javascript and Python implementation with Python as the backend. 
+               This 3d graph is compeltely interactable thanks to the amazing <a href="https://plotly.com/">plotly</a> library. There are two dropdowns which represent the graph type and graph color scheme respectively. The graph type includes contour plots, line plots, and surface triangulations. There is also a x and y range slider, allowing the user to change the x and y bounds. 
+            </p>
          </div>
    </div>
 
@@ -158,12 +160,10 @@
          <div class="twelve columns">
 
 
-         <iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="file2.html" height="800em" width="100%"></iframe>
-
-         <p class="big center">Shown above is the data provided. Unlike the figure above, the surface is not triangulated. As you can see the shape is not very dense in terms of data. the limited data makes utilizing Machine Learning techniques challenging.
+         <img src="images/webapp2.png">            
+         <p class="center">
+            Shown above is a modified display of the data to illustrate how it is fully interactive and manipulable. I would love to share more about the application but cannot due to security concerns.
          </p>
-
-            
 
       <div class="row add-bottom">
 
@@ -174,11 +174,12 @@
                <div class="inline-block">
                   <img src ="images/python.svg">
                </div>
-
                <div class="inline-block">
                   <img src ="images/juptyer.png">
                </div>
-
+               <div class="inline-block">
+                  <img src ="images/jquery.png">
+               </div>
                <div class="inline-block">
                   <img src ="images/tensorflow.png">
                </div>
@@ -195,19 +196,18 @@
          <div class="twelve columns">
 
             <h3>Our Approach</h3>
-            <p class="big">
+            <p>
                We have been exploring many machine learning techniques and strategies for fitting this data. We have had success using <b>Keras</b> with <b>TensorFlow</b>. <br><br>
 
                We have begun by modulating the problem into easier to solve problems. We plotted individual collectors and attempted to use deep learning techniques for fitting individual lines. Below are some of the fits we have created. On the left is the original data and on the right is the machine learning line fit: 
             </p>
 
             <p>
-            <img alt="sample-image" src="images/challengingFitTechnique.png"  >
+               <img alt="sample-image" src="images/challengingFitTechnique.png"  >
             </p>
 
-            <p class="big">
-
-            Below is another fit we have generated. As you can see it fits it adequetly but has issues at either tail end of the curve. The curve is not exact. We have worked on remedieting this issue by modifying the parameters of the deep fit such as epoch, learning rate, batch size, and loss function.
+            <p>
+               Below is another fit we have generated. As you can see it fits it adequetly but has issues at either tail end of the curve. The curve is not exact. We have worked on remedieting this issue by modifying the parameters of the deep fit such as epoch, learning rate, batch size, and loss function.
             <p>
             <img alt="sample-image" src="images/fit.png" class="center" >
             </p>
