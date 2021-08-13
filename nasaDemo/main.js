@@ -12,6 +12,10 @@
 ----------------------------------------------------------------------------------
 */
 
+let functType = parseInt(window.localStorage.getItem('functType'))
+functType = functType ? functType : "pyramid"
+
+
 colors = ['#800080',
 	'#6d0086',
 	'#59008c',
@@ -42,8 +46,8 @@ xmax = parseInt(window.localStorage.getItem('xmax'))
 viewMode = parseInt(window.localStorage.getItem('view'))
 
 // If values cannot be obtained from local storage, assign them to the default of -22 and 22
-xmin = xmin ? xmin : -22
-xmax = xmax ? xmax : 22
+xmin = xmin ? xmin : -10000
+xmax = xmax ? xmax : 10000
 
 // Initialize variable controlling status of refresh button
 needsRefresh = false
@@ -92,11 +96,13 @@ $( document ).ready(function() {
 		$("body").get(0).style.setProperty("--color-primary", localStorage.getItem('color'));
 	}
 
+	$("#functionType").val(functType)
+
 	// Initialize the JQuery UI slider for the degree range
 	$( "#slider-range" ).slider({
 		range: true,
-		min: -90,
-		max: 90,
+		min: -10000,
+		max: 10000,
 		values: [ xmin, xmax ],
 		slide: function( event, ui ) {
 			updateButton();
@@ -125,11 +131,12 @@ $( document ).ready(function() {
 	// If data already exists, then we can show the graph on page load
 	if (loadedData) {
 		totalData = JSON.parse(loadedData);
-		showGraph();
+	} else {
+		makeplot(pyramid)
 	}
+	showGraph();
 
-	// Add button listeners below for copy to clipboard features
-	$("#clearConsole").click(clearConsole);
+
 
 	$("#copyCentroid").click(function() {
 		copyToClipboard(
@@ -142,6 +149,12 @@ $( document ).ready(function() {
 		copyToClipboard(window.localStorage.getItem("degree"))
 	});
 
+	$("#functionType").change(function() {
+		functType =  $("#functionType").val()
+		window.localStorage.setItem('functType', functType)
+		updateButton();
+	})
+
 	$("#copyPolar").click(function() {
 		copyToClipboard(
 			$("#radius").val() + ", "
@@ -151,6 +164,13 @@ $( document ).ready(function() {
 
 	// Add a listener to the refresh button
 	$( "#refresh").click(function() {
+		if (functType !== $("#functionType").val()) {
+			if ($("#functionType").val() === "pyramid") {
+				makeplot(pyramid)
+			} else {
+				makeplot(bumps)
+			}
+		}
 		showGraph();
 	});
 
@@ -209,10 +229,6 @@ $( document ).ready(function() {
 	// Add secondary class, remove primary class, and disable the refresh button
 	$('#refresh').addClass('secondary').removeClass('primary').prop('disabled', true);
 
-	document.getElementById("codeTag").innerHTML = window.localStorage.getItem("log")
-	document.getElementById('input').addEventListener("click", clickButton,false);
-	document.getElementById('inputFile').addEventListener("change", uploadFile,false);
-
 	document.getElementById('colorScale').addEventListener("change", updateButton,false);
 
 	console.log( "ready!" );
@@ -227,11 +243,9 @@ $( document ).ready(function() {
 
 // Function for creating the graph with different modes
 function updateGraph(xyzdata, mode, type) {
-	updateConsole("Updating Graph", "");
 	let colorScheme = $("#colorScale").val();
-
+	console.log("test")
 	const traces = [];
-	heat = []
 
 	const layout = {
 		scene: {
@@ -246,12 +260,6 @@ function updateGraph(xyzdata, mode, type) {
 		showlegend: false,
 		paper_bgcolor: viewMode ? "#050015" : "white"
 	};
-
-	for (var i = 0; i < xyzdata[0].length; i++) {
-		for (var j = 0; j < xyzdata[1].length; j++) {
-			heat.push(xyzdata[2][i][j])
-		}
-	}
 
 	if (colorScheme == "psyche") {
 		colorScheme = [[0, 'rgb(48, 33, 68)'],[0.2, 'rgb(89, 38, 81)'],[0.4, 'rgb(165, 63, 91)'],[0.6, 'rgb(239, 89, 102)'], [0.8, 'rgb(244, 124, 51)'],[1, 'rgb(249, 160, 0)'] ]
@@ -269,203 +277,33 @@ function updateGraph(xyzdata, mode, type) {
 	}
 	var hoverText = [];
 	// For the surface, contour, and scatter plot graph
-	if(type == "mesh3d" || type == "contour" || mode == "markers") {
+	let x = totalData[0]
+	let y = totalData[1]
+	let z = totalData[2]
 
-		x = []
-		y = []
-		z = []
-
-		// Loop through every collector
-		for (var i = 0; i < xyzdata[0].length; i++) {
-			if (type == "contour") {
-
-				// Loop through every degree
-				for (var j = 0; j < xyzdata[1].length; j++) {
-					if (xyzdata[1][j] >= xmin && xyzdata[1][j] <= xmax && xyzdata[0][i][j] >= xmin && xyzdata[0][i][j] <= xmax) {
-						x.push(xyzdata[0][i][j])
-						y.push(xyzdata[1][j])
-						z.push(xyzdata[2][i][j])
-						hoverText.push("Probe #:" + (i + 1).toString() + "<br>Theta: " + (xyzdata[1][j]).toString() + "<br>Phi:" + (-22 + i * 2 + 90).toString());
-
-					}
-				}
-			} else {
-				x = x.concat(xyzdata[0][i])
-				y = y.concat(xyzdata[1])
-				z = z.concat(xyzdata[2][i])
-
-				for (var j = 0; j < xyzdata[1].length; j++) {
-					hoverText.push("Probe #:" + (i + 1).toString() + "<br>Theta: " + (xyzdata[1][j]).toString() + "<br>Phi:" + (-22 + i * 2 + 90).toString());
-				}
-			}
-		}
-
-		var trace = {
-			x: x, y: y, z: z,
-			name: '',
-			type: type,
-			mode: mode,
+	var trace = {
+		x: x, y: y, z: z,
+		name: '',
+		type: type,
+		mode: mode,
+		colorscale: colorScheme,
+		contour_show: true,
+		contour_width: 2,
+		intensity: z,
+		marker: {
+			color: z,
 			colorscale: colorScheme,
-			contour_show: true,
-			contour_width: 2,
-			intensity: z,
-			hovertext: hoverText,
-			marker: {
-				color: z,
-				colorscale: colorScheme,
-				size: 4,
-				x0:xmin,
-				y0:xmin,
-				colorbar: { thickness:20 }
-			},
-			contours: {
-				showlabels: true,
-			}
-		};
-
-		traces.push(trace);
-
-	} else if (type == "curve") {
-		r = 3
-
-		x = []
-		y = []
-		z = []
-		hoverText = []
-
-		for (var i = 0; i < xyzdata[0].length; i++) {
-			for (var j = 0; j < xyzdata[1].length; j++) {
-
-				alpha = toRadians(xyzdata[1][j])
-				polar = toRadians(-22+i*2+90)
-
-				x.push(r * Math.sin(polar) * Math.cos(alpha))
-				y.push(r * Math.sin(polar) * Math.sin(alpha))
-				z.push(r * Math.cos(polar))
-
-				hoverText.push("Probe #:" + (i+1).toString() + "<br>Theta: "+ (xyzdata[1][j]).toString() +"<br>Phi:" + (-22+i*2+90).toString() )
-			}
+			size: 4,
+			x0:xmin,
+			y0:xmin,
+			colorbar: { thickness:20 }
+		},
+		contours: {
+			showlabels: true,
 		}
+	};
 
-		layout["scene"]["xaxis"]["title"] = ""
-		layout["scene"]["zaxis"]["title"] = "z Probe Angle"
-
-		layout["scene"]["yaxis"]['range'] = [Math.min.apply(Math, y),Math.max.apply(Math, y)]
-		layout["scene"]["xaxis"]['range'] = []
-		layout["scene"]["xaxis"]['showticklabels'] = false
-
-
-		layout["scene"]["yaxis"]['ticktext'] = ['0',
-			Math.min.apply(Math, xyzdata[1]).toFixed(0)+"°",
-			(Math.min.apply(Math, xyzdata[1])/2).toFixed(0) +"°",
-			Math.max.apply(Math, xyzdata[1]).toFixed(0)+"°",
-			(Math.max.apply(Math, xyzdata[1])/2).toFixed(0)+"°"]
-
-		layout["scene"]["yaxis"]['tickvals'] = [0,
-			Math.min.apply(Math, y),
-			Math.min.apply(Math, y)/2,
-			Math.max.apply(Math, y),
-			Math.max.apply(Math, y)/2]
-
-		layout["scene"]["zaxis"]['ticktext'] = ['0',"-22°","22°","-11°","11°"]
-		layout["scene"]["zaxis"]['tickvals'] = ['0',
-			Math.min.apply(Math, z),
-			Math.max.apply(Math, z), +
-				Math.min.apply(Math, z)/2,
-			Math.max.apply(Math, z)/2]
-
-		layout["scene"]["aspectratio"] = {}
-
-		var trace = {
-			x: x,
-			y: y,
-			z: z,
-			name: '',
-			type: "scatter3d",
-			mode: "markers",
-			colorscale: colorScheme,
-			contour_show: true,
-			contour_width: 2,
-			intensity: heat,
-			hovertext: hoverText,
-			marker: {
-				color: heat,
-				colorscale: colorScheme,
-				size: 4,
-				colorbar: { thickness:20 }
-			},
-		}
-
-		traces.push(trace)
-
-		var text = "r: " + $("#radius").val() + "<br>" +
-				   "phi: " + $("#phi").val() + "<br>" +
-			       "theta: " + $("#theta").val() + "<br>";
-
-		var trace = {
-			x: [window.localStorage.getItem("xCentroid")], y: [window.localStorage.getItem("yCentroid")], z: [window.localStorage.getItem("zCentroid")],
-			name: 'Centroid',
-			type: "scatter3d",
-			mode: "markers",
-			hovertext: text,
-
-			marker: {
-				color: 'red',
-				size: 10
-			}
-		}
-
-		traces.push(trace)
-
-	} else if (type == "histogram") {
-		var trace = {
-			x: xyzdata[1],
-			type: 'histogram',
-			marker: {
-				color: "rgba(152,152,152,0.7)",
-				line: {
-					color:  $("body").get(0).style.getPropertyValue("--color-primary"),
-					width: 1
-				}
-			}
-		};
-		layout['xaxis'] = {title: "Degree"}
-		layout['yaxis'] = {title: "Count"}
-		layout['xaxis']['tickfont'] = {color: '#f5f5f5'}
-
-		if (viewMode) {
-			layout['xaxis']['tickfont'] = {color: '#f5f5f5'}
-			layout['xaxis']['titlefont'] = {color: '#f5f5f5'}
-
-			layout['yaxis']['tickfont'] = {color: '#f5f5f5'}
-			layout['yaxis']['titlefont'] = {color: '#f5f5f5'}
-
-		}
-
-		traces.push(trace)
-
-	} else {
-		// For the line plot
-		for (var j = 0; j < xyzdata[1].length; j++) {
-			hoverText.push("Probe #:" + (i + 1).toString() + "<br>Theta: " + (xyzdata[1][j]).toString() + "<br>Phi:" + (-22 + i * 2 + 90).toString());
-		}
-		for (var i = 0; i < xyzdata[0].length; i++) {
-			var trace = {
-				x: xyzdata[0][i], y: xyzdata[1], z: xyzdata[2][i],
-				name: '',
-				type: type,
-				mode: mode,
-				showscale: false,
-				hovertext:hoverText,
-				marker: {
-					color: colors[i],
-					size: 8
-				}
-			}
-
-			traces.push(trace)
-		}
-	}
+	traces.push(trace);
 
 	newPlot = Plotly.newPlot('myDiv', traces, layout,{displayModeBar: true,responsive:true});
 }
@@ -528,112 +366,84 @@ function weightedAverage(data,weights) {
 	return wumDataWeights/sumWeights;
 }
 
+function bumps(x, y) {
+	return (Math.sin(5*x)*Math.cos(5*y))/5;
+}
+
+function pyramid(x, y) {
+	return 1-Math.abs(x+y)-Math.abs(y-x)
+}
 // Function for first parsing the data as it si uploaded using the upload file button
-function makeplot(input) {
-
-		totalData = [[],[],[]]
-
-		data = input.split("\r\n")
-
-		var i = 0;
-
-		while(i < data.length) {
-			if(data[i] == "") {
-				data.splice(i, 1);
-				i--;
-			} else {
-				data[i] = data[i].split("\t")
-			}
-
-			i++;
-		}
-
-		setDegrees = false
-
-		for (var j = 0; j < 23; ++j) {
-
-			z = [];
-			y = [];
-			x = [];
-
-			for (var i = 0; i < data.length; ++i) {
-				if(!setDegrees) {
-					y.push(data[i][0]);
-				}
-
-				z.push(-1*data[i][j+1]);
-
-			}
-
-			for (var q = 0; q < data.length; q++) {
-				x.push(-22 + j * 2);
-			}
-
+function makeplot(functionRef) {
+	totalData = [[], [], []]
+	let input = ""
+	for (var x = -10000; x < 10000; x += 100) {
+		for (var y = -10000; y < 10000; y += 100) {
 			totalData[0].push(x)
-
-			// In this part we only need to do this once since all degrees are the same
-			if(!setDegrees) {
-				setDegrees = true
-				totalData[1] = y;
-			}
-
-			totalData[2].push(z)
-
+			totalData[1].push(y)
+			totalData[2].push(functionRef(x,y))
 		}
-
-		x = []
-		y = []
-		z = []
-		heat = []
-		r=3
-		for (var i = 0; i < totalData[0].length; i++) {
-			for (var j = 0; j < totalData[1].length; j++) {
-				let theta = toRadians(totalData[1][j])
-				let phi = toRadians(-22+i*2+90)
-
-				heat.push(totalData[2][i][j])
-
-				x.push(r * Math.sin(phi) * Math.cos(theta))
-				y.push(r * Math.sin(phi) * Math.sin(theta))
-				z.push(r * Math.cos(phi))
-
-			}
-		}
-
-		const centroid = [weightedAverage(x, heat), weightedAverage(y, heat), weightedAverage(z, heat)];
-
-		var x = centroid[0]
-		var y = centroid[1]
-		var z = centroid[2]
-
-		// r = sqrt ( x^2 + y^2 + z^2 )
-		const radius = Math.sqrt(x*x + y*y + z*z);
-
-		// phi (ϕ) = arctan ( sqrt( x^2 + y^2 ) / z )
-		const phi = Math.atan(Math.sqrt(x*x + y*y) / z)
-
-		// theta (θ) = arctan ( y/x )
- 		const theta = Math.atan(y/x)
-
-		const degree = Math.acos(x / radius );
-
-		updateDataView(centroid[0],centroid[1],centroid[2], degree, radius, toDegrees(phi), toDegrees(theta))
-
-		window.localStorage.setItem("xCentroid",centroid[0]);
-		window.localStorage.setItem("yCentroid",centroid[1]);
-		window.localStorage.setItem("zCentroid",centroid[2]);
-
-		window.localStorage.setItem("radius",radius);
-		window.localStorage.setItem("phi",phi);
-		window.localStorage.setItem("theta",theta);
-
-		window.localStorage.setItem("degree",degree);
+	}
 
 
-		// Update refresh button
-		$('#refresh').addClass('primary').removeClass('secondary');
-		$('#refresh').prop('disabled', false);
-		window.localStorage.setItem('totalData', JSON.stringify(totalData));
+	//totalData0 = x
+	//totalData1 = y
+	//totalData2 = z
+
+	x = []
+	y = []
+	z = []
+	heat = []
+	r=3
+
+	for (var i = 0; i < totalData[0].length; i++) {
+		let theta = toRadians(totalData[1][i])
+		let phi = toRadians(-22+i*2+90)
+
+		heat.push(totalData[2][i])
+
+		x.push(r * Math.sin(phi) * Math.cos(theta))
+		y.push(r * Math.sin(phi) * Math.sin(theta))
+		z.push(r * Math.cos(phi))
+
+
+	}
+
+	const centroid = [weightedAverage(x, heat), weightedAverage(y, heat), weightedAverage(z, heat)];
+
+	var x = centroid[0]
+	var y = centroid[1]
+	var z = centroid[2]
+
+	// r = sqrt ( x^2 + y^2 + z^2 )
+	const radius = Math.sqrt(x*x + y*y + z*z);
+
+	// phi (ϕ) = arctan ( sqrt( x^2 + y^2 ) / z )
+	const phi = Math.atan(Math.sqrt(x*x + y*y) / z)
+
+	// theta (θ) = arctan ( y/x )
+	const theta = Math.atan(y/x)
+
+	const degree = Math.acos(x / radius );
+
+	updateDataView(centroid[0],centroid[1],centroid[2], degree, radius, toDegrees(phi), toDegrees(theta))
+
+	window.localStorage.setItem("xCentroid",centroid[0]);
+	window.localStorage.setItem("yCentroid",centroid[1]);
+	window.localStorage.setItem("zCentroid",centroid[2]);
+
+	window.localStorage.setItem("radius",radius);
+	window.localStorage.setItem("phi",phi);
+	window.localStorage.setItem("theta",theta);
+
+	window.localStorage.setItem("degree",degree);
+
+
+	// Update refresh button
+	$('#refresh').addClass('primary').removeClass('secondary');
+	$('#refresh').prop('disabled', false);
+
+	window.localStorage.setItem('totalData', JSON.stringify(totalData));
 }
 
 function resP(id){
@@ -651,25 +461,6 @@ function resP(id){
 
 
 resP('myDiv')
-// Function for updating conents of the web page console
-function updateConsole(data, type) {
-	var d = new Date();
-	date = d.getMonth() + "/" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds()
-	if (date.length < 11) {
-		for (var i = 0; i <= 11-date.length; i++) {
-			date += " ";
-		}
-	}
-	if (type === "error") {
-		format = "<div class='error'>" +date+ " " + data + "</div>"
-		window.localStorage.setItem("log",window.localStorage.getItem("log")+format)
-		document.getElementById("codeTag").innerHTML += format;
-	} else {
-		format = "<div class='regular'>" +date+ " " + data + "</div>"
-		window.localStorage.setItem("log",window.localStorage.getItem("log")+format)
-		document.getElementById("codeTag").innerHTML += format;
-	}
-}
 
 // Display the centroid calculation on the web pag
 function updateDataView(xCentroid,yCentroid,zCentroid,degree,r,phi,theta) {
@@ -685,34 +476,7 @@ function updateDataView(xCentroid,yCentroid,zCentroid,degree,r,phi,theta) {
 
 }
 
-// Clear the contents of the Console
-function clearConsole(){
-	window.localStorage.setItem("log","")
-	document.getElementById("codeTag").innerHTML = "";
-}
 
-// Function which is called after the upload file button is used to upload data
-function uploadFile() {
-	updateConsole("Uploading Data", "info")
-	const selectedFile = document.getElementById('inputFile').files[0];
-
-	if (selectedFile.type !== "text/plain") {
-		updateConsole("Failed to read file, invalid type", "error");
-		return
-	}
-
-	var reader = new FileReader();
-	try {
-		reader.readAsText(selectedFile, "UTF-8");
-
-		reader.onload = function (evt) {
-			makeplot(evt.target.result)
-		}
-	} catch(e) {
-		updateConsole("Failed to read file, invalid type", "error");
-	}
-
-}
 
 // Programming the upload button
 function clickButton() {
