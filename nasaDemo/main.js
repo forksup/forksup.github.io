@@ -391,8 +391,8 @@ function pyramid(x, y) {
 function makeplot(functionRef) {
 	totalData = [[], [], []]
 	let input = ""
-	for (var x = -10000; x < 10000; x += 100) {
-		for (var y = -10000; y < 10000; y += 100) {
+	for (var x = -10000; x < 10000; x += 500) {
+		for (var y = -10000; y < 10000; y += 500) {
 			totalData[0].push(x)
 			totalData[1].push(y)
 			totalData[2].push(functionRef(x,y))
