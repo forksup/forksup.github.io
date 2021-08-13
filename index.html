@@ -29,15 +29,43 @@
    <!-- Favicons
 	================================================== -->
 	<link rel="shortcut icon" href="favicon.png" >
+   <style>
+      /* Style the video: 100% width and height to cover the entire window */
+      #myVideo {
+         position: absolute;
+         right: 0;
+         bottom: 0;
+         min-width: 100%;
+         min-height: 100%;
+      }
 
+      /* Add some content at the bottom of the video/page */
+      .content {
+         bottom: 0;
+         background: rgba(0, 0, 0, 0.5);
+         color: #f1f1f1;
+         width: 100%;
+         padding: 20px;
+      }
+
+      header div {
+         position:relative;
+      }
+
+
+   </style>
 </head>
 
 <body>
 
    <!-- Header
    ================================================== -->
-   <header id="home">
 
+   <header id="home" >
+      <video autoplay muted loop id="myVideo">
+         <source src="loop.mp4" type="video/mp4">
+      </video>
+      <!-- The video -->
       <nav id="nav-wrap">
 
          <a class="mobile-btn" href="#nav-wrap" title="Show navigation">Show navigation</a>
@@ -50,13 +78,13 @@
 	         <li><a class="smoothscroll" href="#resume">Experience</a></li>
          </ul> <!-- end #nav -->
 
-      </nav> <!-- end #nav-wrap -->
+      </nav> <!-- end #nav-w3rap -->
 
 
       <div class="row banner">
          <div class="banner-text">
             <h1 class="responsive-headline">I'm Mitchell Bucklew.</h1>
-            <h3>I'm a <span>Software Engineer</span>, <span>Artificial Intelligence Enthusiast</span> and <span>Teaching Aid</span> studying at ASU working to complete my Master's degree in Computer Science. Let's <a class="smoothscroll" href="#about">start scrolling</a>
+            <h3>I'm a <span>Software Engineer</span> and <span>Artificial Intelligence Enthusiast</span> studying at ASU working to complete my Master's degree in Computer Science. Let's <a class="smoothscroll" href="#about">start scrolling</a>
             and learn more <a class="smoothscroll" href="#about">about me</a>.</h3>
             <hr />
             <ul class="social">
@@ -91,7 +119,7 @@
             <h2>About Me</h2>
 
             <p>
-               I am a hardworking CS student that loves to learn. And I rock! Currently working to complete a Master's degree in Computer Science as part of the <strong>4+1 program</strong> at ASU. This is an accelerated program that has allowed me to start my Master's course work during the last year of my undergrad. Over the 2020-2021 school year, I have helped many students as an <strong>Undergraduate Teaching Aid</strong>. As part of my undergrad, I am completing research for <strong>NASA</strong> as my capstone project.
+               I am a hardworking CS student that loves to learn. And I rock! Currently working to complete a Master's degree in Computer Science as part of the <strong>4+1 program</strong> at ASU. This is an accelerated program that has allowed me to start my Master's course work during the last year of my undergrad. Over the 2020-2021 school year, I have helped many students as an <strong>Undergraduate Teaching Aid</strong>. As part of my undergrad, I completed research for <strong>NASA</strong> as my capstone project. I currently am working on my Master's Thesis focusing on AI.
             </p>
 
             <div class="row">
@@ -438,7 +466,7 @@
 
                   <h3>Arizona State University</h3>
                   <p class="info">Master's in Computer Science <span>&bull;</span> <em class="date">Est' Complete Date May 2022</em></p>
-                     Thanks to the accelerated <a href="https://cidse.engineering.asu.edu/accelerated/4plus1-in-cs-cse/">4+1</a> program at ASU, I have started my Master's degree during my Senior year. I am excited to further my knowledge of Computer Science to the 'next level' and hope to take primarily Artificial Intelligence-based courses. Currently enrolled in <em>non thesis option</em>.
+                     Thanks to the accelerated <a href="https://cidse.engineering.asu.edu/accelerated/4plus1-in-cs-cse/">4+1</a> program at ASU, I have started my Master's degree during my Senior year. I am excited to further my knowledge of Computer Science to the 'next level' and hope to take primarily Artificial Intelligence-based courses. Enrolled in thesis option where I will be exploring AI human robot teaming concepts.
                   </p>
                   Relevent couse work:
 
@@ -492,8 +520,26 @@
 
                <div class="twelve columns">
 
+                  <h3>Artificial Intelligence Intern</h3>
+                  <p class="info">American Express <span>&bull;</span> <em class="date">Jun. '21 - Aug. '21</em></p>
+
+                  <ul class="disc">
+                     <li>Created a machine learning model using Hugging Face’s pretrained models for natural language processing</li>
+                     <li>Developed incident routing machine learning application potentially saving employees an average of 30 minutes</li>
+                     <li>Created Slack bot using NodeJS for interacting with company portals</li>
+                  </ul>
+                  Tech Used: Jupyter, Docker, NodeJS, Elastic Search, jQuery, POST/GET REST<br>
+
+               </div>
+
+            </div>
+
+            <div class="row item">
+
+               <div class="twelve columns">
+
                   <h3>Software Development Intern</h3>
-                  <p class="info">Neudesic <span>&bull;</span> <em class="date">Jan. '21 - Present</em></p>
+                  <p class="info">Neudesic <span>&bull;</span> <em class="date">Jan. '21 - May. '21</em></p>
 
                   <ul class="disc">
                      <li>Contributed to a software development project by delivering completed user stories and new features</li>
@@ -508,7 +554,7 @@
                <div class="twelve columns">
 
                   <h3>Undergraduate Teaching Aide (UGTA) for CSE 471 Intro to Artificial Intelligence</h3>
-                  <p class="info">Arizona State University <span>&bull;</span> <em class="date">Jan. '21 - Present</em></p>
+                  <p class="info">Arizona State University <span>&bull;</span> <em class="date">Jan. '21 - May. '21</em></p>
 
                   <ul class="disc">
                      <li>Assisted the professor in day-to-day class operations</li>
