@@ -171,14 +171,14 @@ $( document ).ready(function() {
 				case("bumpy"):
 					makeplot(bumps)
 					break;
-				case("tube"):
-					makeplot(tube)
+				case("abs"):
+					makeplot(absVal)
 					break;
 
 			}
 			functType =  $("#functionType").val()
-
 		}
+
 		showGraph();
 	});
 
@@ -378,8 +378,8 @@ function bumps(x, y) {
 	return (Math.sin(5*x)*Math.cos(5*y))/5;
 }
 
-function tube(x,y) {
-	return (0.4^2-(0.6-(x*x+y*y)^0.5)^2)^0.5
+function absVal(x, y) {
+	return Math.abs(x) - Math.abs(y);
 
 
 }
