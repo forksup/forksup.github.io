@@ -150,7 +150,6 @@ $( document ).ready(function() {
 	});
 
 	$("#functionType").change(function() {
-		functType =  $("#functionType").val()
 		window.localStorage.setItem('functType', functType)
 		updateButton();
 	})
@@ -165,11 +164,20 @@ $( document ).ready(function() {
 	// Add a listener to the refresh button
 	$( "#refresh").click(function() {
 		if (functType !== $("#functionType").val()) {
-			if ($("#functionType").val() === "pyramid") {
-				makeplot(pyramid)
-			} else {
-				makeplot(bumps)
+			switch($("#functionType").val()) {
+				case("pyramid"):
+					makeplot(pyramid)
+					break;
+				case("bumpy"):
+					makeplot(bumps)
+					break;
+				case("tube"):
+					makeplot(tube)
+					break;
+
 			}
+			functType =  $("#functionType").val()
+
 		}
 		showGraph();
 	});
@@ -368,6 +376,12 @@ function weightedAverage(data,weights) {
 
 function bumps(x, y) {
 	return (Math.sin(5*x)*Math.cos(5*y))/5;
+}
+
+function tube(x,y) {
+	return (0.4^2-(0.6-(x*x+y*y)^0.5)^2)^0.5
+
+
 }
 
 function pyramid(x, y) {
