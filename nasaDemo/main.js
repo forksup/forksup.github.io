@@ -46,8 +46,8 @@ xmax = parseInt(window.localStorage.getItem('xmax'))
 viewMode = parseInt(window.localStorage.getItem('view'))
 
 // If values cannot be obtained from local storage, assign them to the default of -22 and 22
-xmin = xmin ? xmin : -5000
-xmax = xmax ? xmax : 5000
+xmin = xmin ? xmin : -10000
+xmax = xmax ? xmax : 10000
 
 // Initialize variable controlling status of refresh button
 needsRefresh = false
@@ -97,6 +97,10 @@ $( document ).ready(function() {
 	}
 
 	$("#functionType").val(functType)
+
+	if (localStorage.getItem('graphType')) {
+		$("functionType").val(localStorage.getItem('graphType'))
+	}
 
 	// Initialize the JQuery UI slider for the degree range
 	$( "#slider-range" ).slider({
@@ -340,6 +344,8 @@ function showGraph() {
 		return
 	}
 
+	localStorage.setItem('graphType',$("functionType").val())
+
 	let selectvalue = $("#selectView").val()
 	if (selectvalue === "line") {
 		updateGraph(totalData, "lines", "scatter3d")
@@ -374,7 +380,7 @@ function weightedAverage(data) {
 }
 
 function bumps(x, y) {
-	return Math.sin(x)+Math.sin(y);
+	return (Math.sin(5*x)+Math.sin(5*y)) / 5;
 
 }
 
