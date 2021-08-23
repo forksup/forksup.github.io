@@ -46,8 +46,8 @@ xmax = parseInt(window.localStorage.getItem('xmax'))
 viewMode = parseInt(window.localStorage.getItem('view'))
 
 // If values cannot be obtained from local storage, assign them to the default of -22 and 22
-xmin = xmin ? xmin : -10000
-xmax = xmax ? xmax : 10000
+xmin = xmin ? xmin : -5000
+xmax = xmax ? xmax : 5000
 
 // Initialize variable controlling status of refresh button
 needsRefresh = false
@@ -111,7 +111,7 @@ $( document ).ready(function() {
 			xmin = ui.values[ 0 ]
 			xmax = ui.values[ 1 ]
 
-			if(ui.values[ 0 ] != -22 && ui.values[ 1 ] != 22) {
+			if(ui.values[ 0 ] != xmin && ui.values[ 1 ] != xmax) {
 				updateButton();
 			}
 
@@ -211,15 +211,15 @@ $( document ).ready(function() {
 	});
 
 	$("#resetAngle").click(function() {
-		$("#leftS").val("-22");
-		$("#rightS").val("-22");
+		$("#leftS").val("-5000");
+		$("#rightS").val("5000");
 
-		$("#slider-range").slider('values', 0, -22);
-		$("#slider-range").slider('values', 1, 22);
+		$("#slider-range").slider('values', 0, -5000);
+		$("#slider-range").slider('values', 1, 5000);
 		xmin = -22
 		xmax = 22
-		window.localStorage.setItem('xmin', -22)
-		window.localStorage.setItem('xmax', 22)
+		window.localStorage.setItem('xmin', -5000)
+		window.localStorage.setItem('xmax', 5000)
 		updateButton();
 	})
 
@@ -375,7 +375,8 @@ function weightedAverage(data,weights) {
 }
 
 function bumps(x, y) {
-	return (Math.sin(5*x)*Math.cos(5*y))/5;
+	return Math.sin(x)+Math.sin(y);
+
 }
 
 function absVal(x, y) {
@@ -391,8 +392,8 @@ function pyramid(x, y) {
 function makeplot(functionRef) {
 	totalData = [[], [], []]
 	let input = ""
-	for (var x = -10000; x < 10000; x += 500) {
-		for (var y = -10000; y < 10000; y += 500) {
+	for (var x = -5000; x < 5000; x += 250) {
+		for (var y = -5000; y < 5000; y += 250) {
 			totalData[0].push(x)
 			totalData[1].push(y)
 			totalData[2].push(functionRef(x,y))
@@ -517,7 +518,7 @@ function filterRangeInput(type,self) {
 
 	if(isNumeric(val)) {
 		val = parseInt(val)
-		if(val >= - 90 && val <= 90) {
+		if(val >= - 10000 && val <= 1000) {
 			if (type === 0 && val < $("#rightS").val()) {
 				$("#slider-range").slider('values', type, val);
 				window.localStorage.setItem('xmin', val)
