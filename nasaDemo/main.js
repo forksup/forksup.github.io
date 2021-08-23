@@ -363,15 +363,14 @@ function showGraph() {
 }
 
 // Function for calculating the weighted average
-function weightedAverage(data,weights) {
+function weightedAverage(data) {
 	sumWeights = 0
 	wumDataWeights = 0
 
 	for (var i = 0; i < data.length; i++) {
-		wumDataWeights += data[i]*weights[i]
-		sumWeights += weights[i]
+		wumDataWeights += data[i]
 	}
-	return wumDataWeights/sumWeights;
+	return wumDataWeights/data.length;
 }
 
 function bumps(x, y) {
@@ -415,8 +414,6 @@ function makeplot(functionRef) {
 		let theta = toRadians(totalData[1][i])
 		let phi = toRadians(-22+i*2+90)
 
-		heat.push(totalData[2][i])
-
 		x.push(r * Math.sin(phi) * Math.cos(theta))
 		y.push(r * Math.sin(phi) * Math.sin(theta))
 		z.push(r * Math.cos(phi))
@@ -424,7 +421,7 @@ function makeplot(functionRef) {
 
 	}
 
-	const centroid = [weightedAverage(x, heat), weightedAverage(y, heat), weightedAverage(z, heat)];
+	const centroid = [weightedAverage(x), weightedAverage(y), weightedAverage(z,)];
 
 	var x = centroid[0]
 	var y = centroid[1]
