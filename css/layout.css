@@ -40,6 +40,7 @@ header {
    width: 100%;
    background-size: cover !important;
 	-webkit-background-size: cover !important;
+    background: #161415 url(../images/header-background.jpg) no-repeat top center;
    text-align: center;
    overflow: hidden;
 }
