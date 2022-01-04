@@ -240,7 +240,7 @@
             var data = new FormData()
             data.append('file', input.files[0])
 
-            fetch('http://138.197.70.71:9000/image', {
+            fetch('https://138.197.70.71:9000/image', {
                 method: 'POST',
                 body: data,
             }).then(function(response) {
@@ -258,7 +258,7 @@
             var data = new FormData()
             data.append('text', input)
 
-            fetch('http://138.197.70.71:9000/text', {
+            fetch('https://138.197.70.71:9000/text', {
                 method: 'POST',
                 body: data,
             }).then(function(response) {
