@@ -243,6 +243,9 @@
             fetch('https://138.197.70.71:9000/image', {
                 method: 'POST',
                 body: data,
+                headers: {
+                    "Access-Control-Allow-Origin": "*"
+                }
             }).then(function(response) {
                 return response.json();
             }).then(function(data) {
@@ -261,6 +264,9 @@
             fetch('https://138.197.70.71:9000/text', {
                 method: 'POST',
                 body: data,
+                headers: {
+                    "Access-Control-Allow-Origin": "*"
+                }
             }).then(function(response) {
                 return response.json();
             }).then(function(data) {
