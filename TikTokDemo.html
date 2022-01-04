@@ -1,27 +1,330 @@
 <!DOCTYPE html>
-<html lang="en">
+<!--[if lt IE 8 ]><html class="no-js ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="no-js ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 8)|!(IE)]><!--><html class="no-js" lang="en"> <!--<![endif]-->
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <title>Tik Tok Project</title>
-</head>
-<body class="text-center">
-<form class="form-signin">
-    <img class="mb-4" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72">
-    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <label for="inputEmail" class="sr-only">Email address</label>
-    <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="" style="background-image: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAkCAYAAADo6zjiAAAAAXNSR0IArs4c6QAAAbNJREFUWAntV8FqwkAQnaymUkpChB7tKSfxWCie/Yb+gbdeCqGf0YsQ+hU95QNyDoWCF/HkqdeiIaEUqyZ1ArvodrOHxanQOiCzO28y781skKwFW3scPV1/febP69XqarNeNTB2KGs07U3Ttt/Ozp3bh/u7V7muheQf6ftLUWyYDB5yz1ijuPAub2QRDDunJsdGkAO55KYYjl0OUu1VXOzQZ64Tr+IiPXedGI79bQHdbheCIAD0dUY6gV6vB67rAvo6IxVgWVbFy71KBKkAFaEc2xPQarXA931ot9tyHphiPwpJgSbfe54Hw+EQHMfZ/msVEEURjMfjCjbFeG2dFxPo9/sVOSYzxmAwGIjnTDFRQLMQAjQ5pJAQkCQJ5HlekeERxHEsiE0xUUCzEO9AmqYQhiF0Oh2Yz+ewWCzEY6aYKKBZCAGYs1wuYTabKdNNMWWxnaA4gp3Yry5JBZRlWTXDvaozUgGTyQSyLAP0dbb3DtQlmcan0yngT2ekE9ARc+z4AvC7nauh9iouhpcGamJeX8XF8MaClwaeROWRA7nk+tUnyzGvZrKg0/40gdME/t8EvgG0/NOS6v9NHQAAAABJRU5ErkJggg==&quot;); background-repeat: no-repeat; background-attachment: scroll; background-size: 16px 18px; background-position: 98% 50%; cursor: auto;" autocomplete="off">
-    <label for="inputPassword" class="sr-only">Password</label>
-    <input type="password" id="inputPassword" class="form-control" placeholder="Password" required="" style="background-image: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAkCAYAAADo6zjiAAAAAXNSR0IArs4c6QAAAbNJREFUWAntV8FqwkAQnaymUkpChB7tKSfxWCie/Yb+gbdeCqGf0YsQ+hU95QNyDoWCF/HkqdeiIaEUqyZ1ArvodrOHxanQOiCzO28y781skKwFW3scPV1/febP69XqarNeNTB2KGs07U3Ttt/Ozp3bh/u7V7muheQf6ftLUWyYDB5yz1ijuPAub2QRDDunJsdGkAO55KYYjl0OUu1VXOzQZ64Tr+IiPXedGI79bQHdbheCIAD0dUY6gV6vB67rAvo6IxVgWVbFy71KBKkAFaEc2xPQarXA931ot9tyHphiPwpJgSbfe54Hw+EQHMfZ/msVEEURjMfjCjbFeG2dFxPo9/sVOSYzxmAwGIjnTDFRQLMQAjQ5pJAQkCQJ5HlekeERxHEsiE0xUUCzEO9AmqYQhiF0Oh2Yz+ewWCzEY6aYKKBZCAGYs1wuYTabKdNNMWWxnaA4gp3Yry5JBZRlWTXDvaozUgGTyQSyLAP0dbb3DtQlmcan0yngT2ekE9ARc+z4AvC7nauh9iouhpcGamJeX8XF8MaClwaeROWRA7nk+tUnyzGvZrKg0/40gdME/t8EvgG0/NOS6v9NHQAAAABJRU5ErkJggg==&quot;); background-repeat: no-repeat; background-attachment: scroll; background-size: 16px 18px; background-position: 98% 50%;" autocomplete="off">
-    <div class="checkbox mb-3">
-        <label>
-            <input type="checkbox" value="remember-me"> Remember me
-        </label>
-    </div>
-    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-    <p class="mt-5 mb-3 text-muted">© 2017-2018</p>
-</form>
 
+    <!--- Basic Page Needs
+    ================================================== -->
+    <meta charset="utf-8">
+    <title>Mitchell's Portfolio</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Mobile Specific Metas
+    ================================================== -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!-- CSS
+    ================================================== -->
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/media-queries.css">
+    <link rel="stylesheet" href="css/magnific-popup.css">
+
+    <!-- Script
+    ================================================== -->
+    <script src="js/modernizr.js"></script>
+
+    <!-- Favicons
+     ================================================== -->
+
+    <link rel="shortcut icon"type="image/x-icon"  href="favicon.ico">
+    <style>
+        /* Style the video: 100% width and height to cover the entire window */
+        #myVideo {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        /* Add some content at the bottom of the video/page */
+        .content {
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            color: #f1f1f1;
+            width: 100%;
+            padding: 20px;
+        }
+
+        header div {
+            position:relative;
+        }
+
+
+    </style>
+</head>
+
+<body>
+
+
+
+<!-- Resume Section
+================================================== -->
+<section id="resume">
+
+    <div class="row">
+
+        <div class="column large-12 intro">
+
+            <h1>TikTok Project</h1>
+
+            <p class="lead">Hello TikTok staff! I have created this webpage and accompanying API in order
+                to demonstrate my skills and enthusiasm. In my first two interviews I learned a little about the
+                responsibilities of the data trust and safety team; keeping TikTok appropriate for all audiences.
+                I was told computer vision was used to monitor the content of the video, and NLP techniques were
+                used to monitor the title, text, and audio transcription of the video. To demonstrate my ability I have
+                created an API with both image classification and text classification capabilities using PyTorch. The codebase can be found
+                on my <a href="https://github.com/forksup?tab=repositories">GitHub</a>.
+            </p>
+
+            <hr class="fancy">
+        </div>
+
+    </div>
+
+    <!-- Education
+    ----------------------------------------------- -->
+    <div class="row">
+
+        <div class="three columns header-col">
+            <h1><span>Image Classifier</span></h1>
+        </div>
+
+        <div class="nine columns main-col">
+
+            <div class="row item">
+
+                <div class="twelve columns">
+
+                    <p>For this project I set out to train a classifier to differentiate between pictures
+                        of dogs and cats. I wanted to use my own dataset and use real world data for this problem, so I
+                        scraped pictures from the two subreddits r/cats and r/dogpictures. I searched the top 1000 posts
+                        of all time for pictures and downloaded them locally. This model was trained on about 600 cat pictures and 1000 dog pictures.
+                    </p>
+                    <ul>
+                        <li><span class="info">Pretrained Model:</span> restnet50</li>
+                        <li><span class="info">Additional Layers:</span> ResNet -> Dropout -> Linear -> LogSoftMax</li>
+
+                        <li><span class="info">Final Test Accuracy:</span> 0.973</li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div> <!-- End skills -->
+
+    <div class="row">
+
+        <div class="three columns header-col">
+            <h1><span>Text Classifier</span></h1>
+        </div>
+
+        <div class="nine columns main-col">
+
+            <div class="row item">
+
+                <div class="twelve columns">
+
+                    <p>And for this project I set out to train a classifier to differentiate between Not Safe For Work (NSFW) text
+                        and Safe For Work (SFW) text. These two tags are used to differentiate between appropriate and inappropriate content on reddit.
+                        I could not find any datasets for this problem. I decided to create my own similarly to the image classification project.
+                        First I scraped a list of the top 20 SFW subreddits, and the top 20 NSFW subreddits. Second I scraped
+                        the title of the top 50 posts in those subreddits. I used a simple ceasar cypher to obfuscate the data then save it.
+                        The titles are preprocessed using the Bert pretrained tokenizer and the WordNet lemmatizer. I would have liked to
+                        increase the training dataset size but due to the time limitations I was not. Therefore, the model is biased towards the top
+                        <a href="http://redditlist.com/sfw">20 subreddits.</a>
+                    </p>
+                    <ul>
+                        <li><span class="info">Pretrained Model:</span> bert-base-cased</li>
+                        <li><span class="info">Additional Layers:</span> Bert -> Dropout -> Linear -> ReLU</li>
+
+                        <li><span class="info">Final Test Accuracy:</span> 0.915</li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div> <!-- End skills -->
+
+    <div class="row">
+
+        <div class="three columns header-col">
+            <h1><span>API Configuration</span></h1>
+        </div>
+
+        <div class="nine columns main-col">
+
+            <div class="row item">
+
+                <div class="twelve columns">
+
+                    <p>To deploy the API, I created a docker container which contains all necessary requirements. This API is built off
+                        of the Python package FastAPI which makes it easy to integrate PyTorch. I pushed my container to
+                        the docker hub to make it easily accessible from my server. The API has been deployed on a Ubuntu 20 virtual machine
+                        running off of digital ocean.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div> <!-- End skills -->
+
+
+    <!-- Work
+    ----------------------------------------------- -->
+    <div class="row work">
+
+        <div class="three columns header-col">
+            <h1><span>API Demonstration</span></h1>
+        </div>
+
+        <div class="nine columns main-col">
+
+            <h3 class="h-add-bottom">Dog or Cat?</h3>
+
+            <form id="image_classification_form" onsubmit="return false">
+                <div>
+                    <label for="myFile">Please Upload a File</label>
+                    <input type="file" id="myFile" name="file">
+                </div>
+                <br>
+                <input class="btn--primary h-full-width" type="submit" value="Submit">
+                <p id="image_output">
+                </p>
+            </form>
+
+
+        </div>
+
+        <div class="nine columns main-col">
+
+            <h3 class="h-add-bottom">NSFW or SFW?</h3>
+
+            <form id="text_classification_form" onsubmit="return false">
+                <div>
+                    <label for="text_input">Text to Classify</label>
+                    <input class="h-full-width" type="text" id="text_input">
+                </div>
+
+                <input class="btn--primary h-full-width" type="submit" value="Submit">
+                <p id="text_output">
+                </p>
+            </form>
+
+
+        </div>
+
+    </div> <!-- End Work -->
+
+    <script>
+
+
+        const image_api = async () => {
+
+            var input = document.querySelector('input[type="file"]')
+
+            var data = new FormData()
+            data.append('file', input.files[0])
+
+            fetch('http://138.197.70.71:9000/image', {
+                method: 'POST',
+                body: data,
+            }).then(function(response) {
+                return response.json();
+            }).then(function(data) {
+                document.getElementById("image_output").innerHTML = "I think this is a <mark>"+data["message"]+"</mark>"
+            });
+
+        }
+
+        const text_api = async () => {
+
+            var input = document.getElementById("text_input").value
+
+            var data = new FormData()
+            data.append('text', input)
+
+            fetch('http://138.197.70.71:9000/text', {
+                method: 'POST',
+                body: data,
+            }).then(function(response) {
+                return response.json();
+            }).then(function(data) {
+                document.getElementById("text_output").innerHTML = "I think this is <mark>"+data+"</mark>"
+            });
+
+        }
+
+        var image_form = document.getElementById("image_classification_form");
+        image_form.addEventListener('submit', image_api);
+
+        var text_form = document.getElementById("text_classification_form");
+        text_form.addEventListener('submit', text_api);
+
+    </script>
+    <!-- Skills
+    ----------------------------------------------- -->
+
+</section> <!-- Resume Section End-->
+
+
+<!-- footer
+================================================== -->
+<footer>
+
+    <div class="row">
+
+        <div class="twelve columns">
+
+            <ul class="social-links">
+
+                <li><a href="https://www.linkedin.com/in/mitchell-bucklew-3b9315138/"><i class="fa fa-linkedin"></i></a></li>
+                <li><a href="https://www.youtube.com/channel/UCt4hxBaveiN_wAD2Fyb4uvA"><i class="fa fa-youtube"></i></a></li>
+                <li><a href="https://github.com/forksup"><i class="fa fa-github"></i></a></li>
+
+            </ul>
+
+            <ul class="copyright">
+                <li>&copy; Copyright 2021</li>
+                <li>Created by <a href="mailto:mbucklew@asu.edu" title="Styleshout">mbucklew@asu.edu</a></li>
+
+                <li>Design by <a href="http://www.styleshout.com/" title="Styleshout" target="_blank">Styleshout</a></li>
+            </ul>
+
+        </div>
+
+        <div id="go-top"><a class="smoothscroll" title="Back to Top" href="#home"><i class="icon-up-open"></i></a></div>
+
+    </div>
+
+</footer> <!-- Footer End-->
+
+<!-- Java Script
+================================================== -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="js/jquery-1.10.2.min.js"><\/script>')</script>
+<script type="text/javascript" src="js/jquery-migrate-1.2.1.min.js"></script>
+
+<script src="js/jquery.flexslider.js"></script>
+<script src="js/waypoints.js"></script>
+<script src="js/jquery.fittext.js"></script>
+<script src="js/magnific-popup.js"></script>
+<script src="js/init.js"></script>
 
 </body>
+
 </html>
